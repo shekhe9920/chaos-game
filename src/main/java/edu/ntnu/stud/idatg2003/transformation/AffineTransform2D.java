@@ -1,5 +1,8 @@
 package edu.ntnu.stud.idatg2003.transformation;
 
-public class AffineTransformation2D {
+/**
+ *
+ */
+public class AffineTransform2D {
 
 }

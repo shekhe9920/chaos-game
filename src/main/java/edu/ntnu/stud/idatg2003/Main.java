@@ -1,2 +1,5 @@
-package edu.ntnu.stud.idatg2003.mathoperations;public class Main {
+package edu.ntnu.stud.idatg2003;
+
+public class Main {
+
 }

@@ -1,3 +1,8 @@
-public class Transform2D {
+package edu.ntnu.stud.idatg2003.transformation;
+
+/**
+ *
+ */
+public interface Transform2D {
 
 }
