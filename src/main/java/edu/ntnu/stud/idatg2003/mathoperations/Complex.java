@@ -1,9 +1,74 @@
 package edu.ntnu.stud.idatg2003.mathoperations;
 
 /**
+ * The {@code Complex} class represents a complex number, with a real and imaginary part. It extends
+ * the {@code Vector2D} class, and inherits mathematical operations from it.
+ * {@code real} and {@code imaginary} are the real and imaginary parts of the complex number.
  *
- *
+ * @version 0.0.0
+ * @since 0.0.0
  */
-public class Complex {
+public class Complex extends Vector2D {
+
+
+
+
+  /**
+   * Construct a new {@code Complex} number, with a real and imaginary part.
+   *
+   * @param real The real part of the complex number.
+   * @param imaginary The imaginary part of the complex number.
+   * @since 0.0.0
+   */
+  public Complex(double real, double imaginary){
+    super(real, imaginary);
+  }
+
+
+
+  /**
+   * Makes a new complex number from the given vector.
+   *
+   * @return The complex number.
+   * @since 0.0.0
+   */
+  public Complex toComplex() {
+    return new Complex(x0, x1);
+  }
+
+
+
+
+  /**
+   * Multiplies the given complex number with the given complex number.
+   *
+   * @param other The complex number to multiply with.
+   * @return The result of the multiplication.
+   * @since 0.0.0
+   */
+  public Complex multiply(Vector2D other) {
+    double resultX0 = this.x0 * other.x0 - this.x1 * other.x1;
+    double resultX1 = this.x0 * other.x1 + this.x1 * other.x0;
+
+    return new Complex(resultX0, resultX1);
+  }
+
+
+
+
+  /**
+   * Calculates the square root of a complex number.
+   *
+   * @return The result of the square root.
+   * @since 0.0.0
+   */
+  public Complex sqrt() {
+    double magnitude = Math.sqrt(x0 * x0 + x1 * x1);
+
+    double newReal = Math.sqrt(0.5 * (magnitude + x0));
+    double newImaginary = Math.signum(x1) * Math.sqrt(0.5 * (magnitude - x0));
+
+    return new Complex(newReal, newImaginary);
+  }
 
 }
