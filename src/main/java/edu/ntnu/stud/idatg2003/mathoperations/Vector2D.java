@@ -64,7 +64,14 @@ public class Vector2D {
    * @since 0.0.0
    */
   public Vector2D add(Vector2D otherVector) {
-    return new Vector2D(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
+
+    if (otherVector instanceof Complex) {
+      return new Complex(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
+
+    } else {
+      return new Vector2D(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
+
+    }
   }
 
 
@@ -78,7 +85,13 @@ public class Vector2D {
    * @since 0.0.0
    */
   public Vector2D subtract(Vector2D otherVector) {
-    return new Vector2D(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
+
+    if (otherVector instanceof Complex) {
+      return new Complex(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
+
+    } else {
+      return new Vector2D(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
+    }
   }
 
 }

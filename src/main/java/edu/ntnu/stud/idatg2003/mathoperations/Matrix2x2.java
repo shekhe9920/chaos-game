@@ -8,7 +8,9 @@ package edu.ntnu.stud.idatg2003.mathoperations;
  */
 public class Matrix2x2 {
 
-  private double[][] matrix; // 2x2 matrix, represented as 2 dimensional array.
+  private final double[][] matrix; // 2x2 matrix, represented as 2 dimensional array.
+
+
 
   /**
    * Construct a new {@code Matrix2x2} object with the given matrix.
@@ -19,6 +21,8 @@ public class Matrix2x2 {
   public Matrix2x2(double [][] matrix) {
     this.matrix = matrix;
   }
+
+
 
   /**
    * Multiplies the given vector with the matrix and returns the result.

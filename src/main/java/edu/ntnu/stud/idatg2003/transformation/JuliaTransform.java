@@ -43,7 +43,7 @@ public class JuliaTransform implements Transform2D {
 
     // Calculating the magnitude for the real and imaginary parts separately
     double magnitude = // sqrt( (zMinusC.x0)^2 + (zMinusC.x1)^2
-        Math.sqrt(zMinusC.getX0() * zMinusC.getX0() + zMinusC.getX1() * zMinusC.getX1());
+            Math.sqrt(zMinusC.getX0() * zMinusC.getX0() + zMinusC.getX1() * zMinusC.getX1());
 
     // Calculating numerator using the sqrt method from the Complex class (explicit casting)
     Complex numerator = (Complex) zMinusC.sqrt().multiply(new Complex(sign, 0)).add(point);
@@ -59,7 +59,6 @@ public class JuliaTransform implements Transform2D {
     // Return the result of the division
     return new
         Vector2D(numerator.getX0() / denominator.getX0(), numerator.getX1() / denominator.getX0());
-
   }
 
 }
