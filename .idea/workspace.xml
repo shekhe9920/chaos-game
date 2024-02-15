@@ -4,45 +4,91 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="62ca8b48-fa74-4315-89dc-b7012b96e85f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/checkstyle-idea.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/4/442292b8a7efeabbe4cc176709b833b1792140ec" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/4/4/442292b8a7efeabbe4cc176709b833b1792140ec" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/index.pb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+    <list default="true" id="62ca8b48-fa74-4315-89dc-b7012b96e85f" name="Changes" comment="Implemented mathematical operations and 2D transformations in the system.&#10;&#10; Implemented Vector2D, Complex, and Matrix2x2 classes with fundamental mathematical operation. Added AffineTransform2D and JuliaTransform classes for 2D transformations. Also, introduced the Transform2D interface.">
+      <change afterPath="$PROJECT_DIR$/src/test/java/edu/ntnu/stud/idatg2003/mathoperations/ComplexTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/0/7/0778545fafa3ff102e4125bd274341909e1f6e5a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/1/0/100b6b8b98efb820b1534489bc017532676d8e64" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/1/0/100b6b8b98efb820b1534489bc017532676d8e64" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/1/4/14b023262582a256dfba11bfae5a214089dd8069" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/0/40ab25369835a216d33402764ffcc9e175207abc" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/0/40ab25369835a216d33402764ffcc9e175207abc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/1/4197ddd3942047092445d5dcccc835fbbd56c57c" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/4/1/4197ddd3942047092445d5dcccc835fbbd56c57c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/6/a/6a4f7b3b7a07b109a6b74d41bf1ee3ecd533cdf5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/d/1/d1bdf3c39d56ef4bce2e27edf9d9574ef11a35cb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/issuestore/index.pb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/0/7/0778545fafa3ff102e4125bd274341909e1f6e5a" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/1/4/14b023262582a256dfba11bfae5a214089dd8069" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/6/a/6a4f7b3b7a07b109a6b74d41bf1ee3ecd533cdf5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/d/1/d1bdf3c39d56ef4bce2e27edf9d9574ef11a35cb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/index.pb" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/sonarlint/securityhotspotstore/index.pb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/edu/ntnu/stud/idatg2003/mathoperations/Complex.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/edu/ntnu/stud/idatg2003/mathoperations/Complex.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="JUnit5 Test Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="2bstQIpqHr0w9oJh0QHT5Zv2iAW" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <OptionsSetting value="false" id="Update" />
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.Main.executor": "Run",
+    "Application.Unnamed.executor": "Debug",
+    "JUnit.ComplexTest.VectorToComplexNegativeTest.executor": "Run",
+    "JUnit.ComplexTest.VectorToComplexPositiveTest.executor": "Run",
+    "JUnit.ComplexTest.executor": "Run",
+    "JUnit.ComplexTest.multiplyPositiveTest.executor": "Run",
+    "JUnit.ComplexTest.sqrt.executor": "Run",
     "Maven.ChaosGame [clean].executor": "Run",
     "Maven.ChaosGame [compile].executor": "Run",
     "Maven.ChaosGame [package].executor": "Run",
+    "Maven.ChaosGame [test].executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/shekh/Desktop/Skole/23.24/Programering2/file-demo-master",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -51,10 +97,123 @@
     "project.structure.last.edited": "SDKs",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "reference.projectsettings.compiler.javacompiler",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CreateTestDialog.Recents.Supers">
+      <recent name="" />
+    </key>
+    <key name="CreateTestDialog.RecentsKey">
+      <recent name="edu.ntnu.stud.idatg2003.mathoperations" />
+    </key>
+  </component>
+  <component name="RunManager" selected="JUnit.ComplexTest.VectorToComplexNegativeTest">
+    <configuration name="Unnamed" type="Application" factoryName="Application" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="jdk.tools.jmod.Main" />
+      <module name="ChaosGame" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ComplexTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChaosGame" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="edu.ntnu.stud.idatg2003.mathoperations.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="edu.ntnu.stud.idatg2003.mathoperations" />
+      <option name="MAIN_CLASS_NAME" value="edu.ntnu.stud.idatg2003.mathoperations.ComplexTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ComplexTest.VectorToComplexNegativeTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChaosGame" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="edu.ntnu.stud.idatg2003.mathoperations.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="edu.ntnu.stud.idatg2003.mathoperations" />
+      <option name="MAIN_CLASS_NAME" value="edu.ntnu.stud.idatg2003.mathoperations.ComplexTest" />
+      <option name="METHOD_NAME" value="VectorToComplexNegativeTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ComplexTest.VectorToComplexPositiveTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChaosGame" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="edu.ntnu.stud.idatg2003.mathoperations.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="edu.ntnu.stud.idatg2003.mathoperations" />
+      <option name="MAIN_CLASS_NAME" value="edu.ntnu.stud.idatg2003.mathoperations.ComplexTest" />
+      <option name="METHOD_NAME" value="VectorToComplexPositiveTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ComplexTest.multiplyPositiveTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChaosGame" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="edu.ntnu.stud.idatg2003.mathoperations.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="edu.ntnu.stud.idatg2003.mathoperations" />
+      <option name="MAIN_CLASS_NAME" value="edu.ntnu.stud.idatg2003.mathoperations.ComplexTest" />
+      <option name="METHOD_NAME" value="multiplyPositiveTest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ComplexTest.sqrt" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChaosGame" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="edu.ntnu.stud.idatg2003.mathoperations.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="edu.ntnu.stud.idatg2003.mathoperations" />
+      <option name="MAIN_CLASS_NAME" value="edu.ntnu.stud.idatg2003.mathoperations.ComplexTest" />
+      <option name="METHOD_NAME" value="sqrt" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.Unnamed" />
+      <item itemvalue="JUnit.ComplexTest" />
+      <item itemvalue="JUnit.ComplexTest.VectorToComplexNegativeTest" />
+      <item itemvalue="JUnit.ComplexTest.VectorToComplexPositiveTest" />
+      <item itemvalue="JUnit.ComplexTest.multiplyPositiveTest" />
+      <item itemvalue="JUnit.ComplexTest.sqrt" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.ComplexTest.VectorToComplexNegativeTest" />
+        <item itemvalue="JUnit.ComplexTest" />
+        <item itemvalue="JUnit.ComplexTest.sqrt" />
+        <item itemvalue="JUnit.ComplexTest.VectorToComplexPositiveTest" />
+        <item itemvalue="JUnit.ComplexTest.multiplyPositiveTest" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -65,11 +224,68 @@
       <updated>1707015596563</updated>
       <workItem from="1707015597589" duration="105000" />
       <workItem from="1707015724264" duration="494000" />
-      <workItem from="1707016318978" duration="1248000" />
+      <workItem from="1707016318978" duration="13925000" />
+      <workItem from="1707099550282" duration="8109000" />
+      <workItem from="1707181850355" duration="2690000" />
+      <workItem from="1707440895716" duration="245000" />
+      <workItem from="1707828032295" duration="9027000" />
     </task>
+    <task id="LOCAL−00001" summary="Initial project setup with package structure and empty classes">
+      <option name="closed" value="true" />
+      <created>1707088025752</created>
+      <option name="number" value="LOCAL−00001" />
+      <option name="presentableId" value="LOCAL−00001" />
+      <updated>1707088025752</updated>
+    </task>
+    <task id="LOCAL−00002" summary="Initial project setup with package structure and empty classes">
+      <option name="closed" value="true" />
+      <created>1707089172244</created>
+      <option name="number" value="LOCAL−00002" />
+      <option name="presentableId" value="LOCAL−00002" />
+      <updated>1707089172244</updated>
+    </task>
+    <task id="LOCAL−00003" summary="Implemented mathematical operations and 2D transformations in the system.&#10;&#10; Implemented Vector2D, Complex, and Matrix2x2 classes with fundamental mathematical operation. Added AffineTransform2D and JuliaTransform classes for 2D transformations. Also, introduced the Transform2D interface.">
+      <option name="closed" value="true" />
+      <created>1707184403361</created>
+      <option name="number" value="LOCAL−00003" />
+      <option name="presentableId" value="LOCAL−00003" />
+      <updated>1707184403361</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial project setup with package structure and empty classes" />
+    <MESSAGE value="Implemented mathematical operations and 2D transformations in the system.&#10;&#10; Implemented Vector2D, Complex, and Matrix2x2 classes with fundamental mathematical operation. Added AffineTransform2D and JuliaTransform classes for 2D transformations. Also, introduced the Transform2D interface." />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented mathematical operations and 2D transformations in the system.&#10;&#10; Implemented Vector2D, Complex, and Matrix2x2 classes with fundamental mathematical operation. Added AffineTransform2D and JuliaTransform classes for 2D transformations. Also, introduced the Transform2D interface." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <dependency master-id="0" />
+          <properties class="java.lang.ClassCastException" package="java.lang" />
+          <option name="timeStamp" value="12" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

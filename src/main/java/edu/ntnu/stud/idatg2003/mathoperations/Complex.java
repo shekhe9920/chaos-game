@@ -32,8 +32,8 @@ public class Complex extends Vector2D {
    * @return The complex number.
    * @since 0.0.0
    */
-  public Complex toComplex() {
-    return new Complex(x0, x1);
+  public Complex toComplex(Vector2D vector) {
+    return new Complex(vector.getX0(), vector.getX1());
   }
 
 
