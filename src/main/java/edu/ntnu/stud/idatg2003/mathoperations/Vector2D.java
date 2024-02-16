@@ -58,19 +58,26 @@ public class Vector2D {
 
   /**
    * Adds the given vector to this vector and returns the result.
+   * If the other vector is a complex number, the result will be a complex number.
+   * Otherwise, the result will be a vector object.
    *
-   * @param otherVector The vector to add to this vector
-   * @return The result of the addition
+   * @param otherVector The vector to add to this vector.
+   * @return A new vector representing the result of the addition.
+   * @throws IllegalArgumentException if the provided vector is null.
    * @since 0.0.0
    */
   public Vector2D add(Vector2D otherVector) {
 
-    if (otherVector instanceof Complex) {
-      return new Complex(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
+    if (otherVector != null) {
+      if (otherVector instanceof Complex) {
+        return new Complex(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
 
+      } else {
+        return new Vector2D(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
+
+      }
     } else {
-      return new Vector2D(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
-
+      throw new IllegalArgumentException("Other vector cannot be null");
     }
   }
 
@@ -79,18 +86,25 @@ public class Vector2D {
 
   /**
    * Subtracts the given vector from this vector and returns the result.
+   * If the other vector is a complex number, the result will be a complex number.
+   * Otherwise, the result will be a vector object.
    *
-   * @param otherVector The vector to subtract from this vector
-   * @return The result of the subtraction
+   * @param otherVector The vector to subtract from this vector-
+   * @return A new vector representing the result of the subtraction.
+   * @throws IllegalArgumentException if the provided vector is null.
    * @since 0.0.0
    */
   public Vector2D subtract(Vector2D otherVector) {
 
-    if (otherVector instanceof Complex) {
-      return new Complex(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
+    if (otherVector != null) {
+      if (otherVector instanceof Complex) {
+        return new Complex(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
 
+      } else {
+        return new Vector2D(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
+      }
     } else {
-      return new Vector2D(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
+      throw new IllegalArgumentException("Other vector cannot be null");
     }
   }
 
