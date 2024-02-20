@@ -12,53 +12,91 @@ import edu.ntnu.stud.idatg2003.mathoperations.Vector2D;
  */
 public class JuliaTransform implements Transform2D {
 
-  private Complex point; // c
-  private int sign;      // ±
+  private Complex point; // Represents the complex constant 'c'
+  private int sign;      // Represents the sign of the transformation, which must be either 1 or -1
 
   /**
-   * Construct a new {@code JuliaTransform} object with the given point and sign.
+   * Constructs a new {@code JuliaTransform} object with the given complex constant 'c' and sign.
    *
-   * @param point The point.
-   * @param sign The sign.
+   * @param point The complex constant 'c'.
+   * @param sign The sign of the transformation, which must be either 1 or -1.
+   * @throws IllegalArgumentException If the sign is not 1 or -1.
    * @since 0.0.0
    */
   public JuliaTransform(Complex point, int sign) {
     this.point = point;
-    this.sign = sign;
+    setSign(sign);
+  }
+
+
+  /**
+   * Sets the sign of the transformation vector.
+   *
+   * @param sign sign The sign to set, which must be either 1 or -1.
+   * @throws IllegalArgumentException If the sign is not 1 or -1.
+   * @since 0.0.0
+   */
+  private void setSign(int sign) {
+    if (sign == 1 || sign == -1) {
+      this.sign = sign;
+    } else {
+      throw new IllegalArgumentException("Sign must be 1 or -1");
+    }
   }
 
   /**
-   * This method is an implementation of the {@code transform} method from
-   * the {@code Transform2D} interface. It takes a complex number as input and returns a new
-   * complex number as output, according to the transformation z -> ±sqrt(z - c).
+   * Gets the sign of the Julia transformation vector.
+   *
+   * @return The sign.
+   * @since 0.0.0
+   */
+  public int getSign() {
+    return sign;
+  }
+
+
+
+
+  /**
+   * Transforms a given complex number {@code z} according to the transformation z -> ±sqrt(z - c).
+   * This method calculates the square root of the difference between the input complex number and
+   * the complex constant 'c'. The sign of the square root is determined by the {@code sign} field
+   * of this {@code JuliaTransform} object.
    *
    * @param z The complex number to transform.
    * @return The transformed complex number.
+   * @since 0.0.0
    */
   @Override
   public Vector2D transform(Vector2D z) {
 
-    Complex complexZ = new Complex(z.getX0(), z.getX1()); // a new complex number from the vector
-    Complex zMinusC = (Complex) complexZ.subtract(point); // z - c
+    Complex complexZ = new Complex(z.getX0(), z.getX1()); // TODO: Maybe use toComplex method from Complex class
+    Complex zMinusC = (Complex) complexZ.subtract(point); // Calculate z - c
 
     // Calculating the magnitude for the real and imaginary parts separately
-    double magnitude = // sqrt( (zMinusC.x0)^2 + (zMinusC.x1)^2
-            Math.sqrt(zMinusC.getX0() * zMinusC.getX0() + zMinusC.getX1() * zMinusC.getX1());
+    double magnitude = Math.sqrt(zMinusC.getX0() * zMinusC.getX0() + zMinusC.getX1() * zMinusC.getX1());
 
-    // Calculating numerator using the sqrt method from the Complex class (explicit casting)
-    Complex numerator = (Complex) zMinusC.sqrt().multiply(new Complex(sign, 0)).add(point);
+    double newReal;
+    double newImaginary;
 
-    // Calculate denominator using magnitude
-    Complex denominator = new Complex(Math.sqrt(magnitude), 0);
-
-    // If the denominator is zero, return a new vector with x0 and x1 set to 0
-    if(denominator.getX0() == 0) {
-      return new Vector2D(0, 0);
+    // Handling the case when zMinusC.x0 < 0 and zMinusC.x1 = 0
+    if (zMinusC.getX0() < 0 && zMinusC.getX1() == 0) {
+      newReal = 0;
+      newImaginary = Math.sqrt(Math.abs(zMinusC.getX0()));
+    } else {
+      newReal = Math.sqrt(0.5 * (magnitude + zMinusC.getX0()));
+      newImaginary = Math.signum(zMinusC.getX1()) * Math.sqrt(0.5 * (magnitude - zMinusC.getX0()));
     }
 
-    // Return the result of the division
-    return new
-        Vector2D(numerator.getX0() / denominator.getX0(), numerator.getX1() / denominator.getX0());
+    // Checking if both newReal and newImaginary are zero
+    if (newReal == 0 && newImaginary == 0) {
+      return new Vector2D(0, 0);
+    } else if (newReal == 0) { // Check if newReal is zero, to avoid "-0.0" in the output
+      return new Vector2D(0, sign * newImaginary);
+    }
+
+    // Return: The transformed vector
+    return new Vector2D(sign * newReal, sign * newImaginary);
   }
 
 }

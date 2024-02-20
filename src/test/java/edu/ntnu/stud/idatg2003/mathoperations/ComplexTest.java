@@ -6,21 +6,27 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+/**
+ * The {@code ComplexTest} class contains unit tests for the {@code Complex} class,
+ * which represents a complex number with real and imaginary parts. The tests verify that the
+ * multiplication and square root of complex numbers are performed correctly.
+ *
+ * @version 0.0.0
+ * @since 0.0.0
+ */
 class ComplexTest {
 
-  Complex complexTest1 = new Complex(1, 1);
-  Complex complexTest2 = new Complex(2, 2);
+  private Complex complexTest1;
+  private Complex complexTest2;
+  private Vector2D vectorTest;
+
+
   @BeforeEach
   void setUp() {
-
+    complexTest1 = new Complex(1, 1);
+    complexTest2 = new Complex(2, 2);
+    vectorTest = new Vector2D(1, 2);
   }
-
-  @AfterEach
-  void tearDown() {
-  }
-
-
-
 
 
 
@@ -33,10 +39,9 @@ class ComplexTest {
 
     // Arrange
     Complex complexTest = new Complex(0.0, 0.0);
-    Vector2D vectorTest1 = new Vector2D(1, 2);
 
     // Act
-    Complex vectorToComplex = complexTest.toComplex(vectorTest1);
+    Complex vectorToComplex = complexTest.toComplex(vectorTest);
 
     // Assert
     assertEquals(Complex.class, vectorToComplex.getClass());
@@ -51,10 +56,8 @@ class ComplexTest {
 
     // Arrange
      Complex complexTest = new Complex(0.0, 0.0);
-     Complex complexTest2 = new Complex(1, 2);
 
-     // Act
-
+    // Act
     Complex vectorToComplex = complexTest.toComplex(complexTest2);
 
     // Assert
@@ -91,7 +94,16 @@ class ComplexTest {
   @Test
   void multiplyNegativeTest() {
 
+    Complex complex = new Complex(1, 1);
+
+    assertThrows(IllegalArgumentException.class, () -> {
+      complex.multiply(null);});
+    System.out.println("IllegalArgumentException thrown, other complex number cannot be null");
+
   }
+
+
+
 
 
   /**
@@ -99,16 +111,18 @@ class ComplexTest {
    * Verifies that the method correctly returns the square root of a complex number.
    */
   @Test
-  void sqrt() {
+  void squareRootCalculationTest() {
     Complex sqrtComplexTest = complexTest1.sqrt();
+    double expectedRealPart = 1.09868411346781;
+    double expectedImaginaryPart = 0.4550898605622274;
+
+    double actualRealPart = sqrtComplexTest.getX0();
+    double actualImaginaryPart = sqrtComplexTest.getX1();
 
     // The square root of (1 + i) is approximately: 1.09868411346781 + 0.4550898605622274i
-    assertEquals(1.09868411346781, sqrtComplexTest.getX0());
-    assertEquals(0.4550898605622274, sqrtComplexTest.getX1());
-
-    assertEquals(1.09868411346781 + "+" + 0.4550898605622274,
-        sqrtComplexTest.getX0() + "+" +  sqrtComplexTest.getX1(),
-        "The result of the square root is not as expected");
+    assertEquals(expectedRealPart + "+" + expectedImaginaryPart,
+        actualRealPart + "+" +  actualImaginaryPart,
+        "CALCULATION ERROR: The result of the square root is not as expected");
 
     System.out.println("The result of the square root is: "
         + sqrtComplexTest.getX0() + " ± " + sqrtComplexTest.getX1() + "i");
