@@ -51,4 +51,18 @@ class Matrix2x2Test {
     assertNotEquals(3, result.getX0());
     assertNotEquals(5, result.getX1());
   }
+
+  /**
+   * Negative test for the Matrix2x2 constructor.
+   * It verifies that an IllegalArgumentException is thrown when
+   * an invalid matrix (3x2 instead of 2x2) is provided.
+   */
+  @Test
+  void matrix2x2_Constructor_InvalidMatrix() {
+    // Arrange
+    double[][] invalidMatrixArray = {{2, 1, 4}, {1, 3, 5}};
+
+    // Act and Assert
+    assertThrows(IllegalArgumentException.class, () -> new Matrix2x2(invalidMatrixArray));
+  }
 }
