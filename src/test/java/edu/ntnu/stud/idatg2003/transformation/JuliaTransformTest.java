@@ -75,8 +75,6 @@ class JuliaTransformTest {
   //================================================================================================
 
 
-
-
   /**
    * Tests the transformation with a positive sign.
    */
