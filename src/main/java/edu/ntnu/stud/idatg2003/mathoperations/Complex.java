@@ -18,7 +18,7 @@ public class Complex extends Vector2D {
    * @param imaginary The imaginary part of the complex number.
    * @since 0.0.0
    */
-  public Complex(double real, double imaginary){
+  public Complex(double real, double imaginary) {
     super(real, imaginary);
   }
 
@@ -80,16 +80,18 @@ public class Complex extends Vector2D {
   public Complex sqrt() {
     double magnitude = Math.sqrt(x0 * x0 + x1 * x1);
 
+    double newReal;
+    double newImaginary;
+
     if (x0 < 0 && x1 == 0) {
-      double newReal = 0.0;
-      double newImaginary = Math.sqrt(Math.abs(x0));
+      newReal = 0.0;
+      newImaginary = Math.sqrt(Math.abs(x0));
 
-      return new Complex(newReal, newImaginary);
     } else {
-      double newReal = Math.sqrt(0.5 * (magnitude + x0));
-      double newImaginary = Math.signum(x1) * Math.sqrt(0.5 * (magnitude - x0));
+      newReal = Math.sqrt(0.5 * (magnitude + x0));
+      newImaginary = Math.signum(x1) * Math.sqrt(0.5 * (magnitude - x0));
 
-      return new Complex(newReal, newImaginary);
     }
+    return new Complex(newReal, newImaginary);
   }
 }

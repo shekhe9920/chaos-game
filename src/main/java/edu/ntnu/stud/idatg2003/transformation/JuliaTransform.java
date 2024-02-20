@@ -70,11 +70,12 @@ public class JuliaTransform implements Transform2D {
   @Override
   public Vector2D transform(Vector2D z) {
 
-    Complex complexZ = new Complex(z.getX0(), z.getX1()); // TODO: Maybe use toComplex method from Complex class
+    Complex complexZ = new Complex(z.getX0(), z.getX1()); // TODO: Maybe use toComplex method from Complex class instead of this line
     Complex zMinusC = (Complex) complexZ.subtract(point); // Calculate z - c
 
     // Calculating the magnitude for the real and imaginary parts separately
-    double magnitude = Math.sqrt(zMinusC.getX0() * zMinusC.getX0() + zMinusC.getX1() * zMinusC.getX1());
+    double magnitude =
+        Math.sqrt(zMinusC.getX0() * zMinusC.getX0() + zMinusC.getX1() * zMinusC.getX1());
 
     double newReal;
     double newImaginary;
