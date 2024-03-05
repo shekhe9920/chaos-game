@@ -54,4 +54,14 @@ public class Matrix2x2 {
     double resultX1 = matrix[1][0] * vector.getX0() + matrix[1][1] * vector.getX1();
     return new Vector2D(resultX0, resultX1);
   }
+
+
+  public double[][] getMatrix() {
+    return matrix;
+  }
+
+
+  public double getElement(int row, int column) {
+    return matrix[row][column];
+  }
 }
