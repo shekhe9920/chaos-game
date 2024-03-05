@@ -107,5 +107,4 @@ public class Vector2D {
       throw new IllegalArgumentException("Other vector cannot be null");
     }
   }
-
 }
