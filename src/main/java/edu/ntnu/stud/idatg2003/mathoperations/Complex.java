@@ -5,7 +5,7 @@ package edu.ntnu.stud.idatg2003.mathoperations;
  * the {@code Vector2D} class, and inherits mathematical operations from it.
  * {@code real} and {@code imaginary} are the real and imaginary parts of the complex number.
  *
- * @version 0.0.0
+ * @version 0.0.1
  * @since 0.0.0
  */
 public class Complex extends Vector2D {

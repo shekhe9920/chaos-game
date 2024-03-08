@@ -5,7 +5,7 @@ package edu.ntnu.stud.idatg2003.mathoperations;
  * Where x0 and x1 are the coordinates or components of the vector,
  * representing the x and components of a vector.
  *
- * @version 0.0.0
+ * @version 0.0.1
  * @since 0.0.0
  */
 public class Vector2D {

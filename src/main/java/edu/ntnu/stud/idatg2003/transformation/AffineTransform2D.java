@@ -8,7 +8,7 @@ import edu.ntnu.stud.idatg2003.mathoperations.Vector2D;
  * x -> Ax + b, where A is a 2x2 matrix, and b is a 2-dimensional vector.
  * It implements the {@code Transform2D} interface, and has a single method, {@code transform}.
  *
- * @version 0.0.0
+ * @version 0.0.1
  * @since 0.0.0
  */
 public class AffineTransform2D implements Transform2D {

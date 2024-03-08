@@ -18,7 +18,8 @@ import java.util.Scanner;
  * The {@code ChaosGameFileHandler} class provides methods for reading and writing chaos game descriptions
  * from/to files.
  *
- * @since 1.0.0
+ * @version 0.0.1
+ * @since 0.0.1
  */
 public class ChaosGameFileHandler {
 
@@ -29,6 +30,7 @@ public class ChaosGameFileHandler {
    * @return A {@code ChaosGameDescription} object representing the chaos game description.
    * @throws FileNotFoundException If the file is not found.
    * @throws IllegalArgumentException If the file format is invalid.
+   * @since 0.0.1
    */
 
   public static ChaosGameDescription readFromFile(String path) throws FileNotFoundException {
@@ -79,6 +81,7 @@ public class ChaosGameFileHandler {
    * @param filePath The path to the file to read.
    * @return A {@code ChaosGameDescription} object representing the chaos game description.
    * @throws FileNotFoundException If the file is not found.
+   * @since 0.0.1
    */
 
   public static ChaosGameDescription readJuliaTransformsFromFile(String filePath) throws FileNotFoundException {
@@ -114,6 +117,7 @@ public class ChaosGameFileHandler {
    * @param chaosGameDescription The {@code ChaosGameDescription} object to write.
    * @param path                 The path to the file to write to.
    * @throws IOException If an I/O error occurs.
+   * @since 0.0.1
    */
   public static void writeToFile(ChaosGameDescription chaosGameDescription, String path)
       throws IOException {

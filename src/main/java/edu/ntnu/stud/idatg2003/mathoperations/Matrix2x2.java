@@ -3,7 +3,7 @@ package edu.ntnu.stud.idatg2003.mathoperations;
 /**
  * {@code Matrix2x2} is a class representing a 2x2 matrix.
  *
- * @version 0.0.0
+ * @version 0.0.1
  * @since 0.0.0
  */
 public class Matrix2x2 {

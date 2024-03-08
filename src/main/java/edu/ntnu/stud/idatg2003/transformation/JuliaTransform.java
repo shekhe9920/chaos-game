@@ -7,7 +7,7 @@ import edu.ntnu.stud.idatg2003.mathoperations.Vector2D;
  * The {@code JuliaTransform} class represents a complex transformation of the form
  * z -> ±sqrt(z - c), where z is a complex number, and c is a complex constant.
  *
- * @version 0.0.0
+ * @version 0.0.1
  * @since 0.0.0
  */
 public class JuliaTransform implements Transform2D {

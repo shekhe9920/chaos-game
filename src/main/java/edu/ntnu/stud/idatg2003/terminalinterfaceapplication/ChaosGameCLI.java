@@ -27,7 +27,7 @@ public class ChaosGameCLI {
     public static void main(String[] args) {
         int height = 0;
         int width = 0;
-        int maxIterations = 0;
+        int maxIterations;
         String filePath = null;
         Scanner scanner = new Scanner(System.in);
         ChaosGameDescription gameDescription = null;
@@ -126,29 +126,30 @@ public class ChaosGameCLI {
      *
      * @param filePath     The path to the file containing the chaos game description.
      * @param maxIterations The maximum number of iterations to run the chaos game.
+     * @since 0.0.1
      */
     private static void printCanvas(String filePath, int maxIterations) {
         ChaosGameFileHandler fileHandler = new ChaosGameFileHandler();
         try {
             ChaosGameDescription description = fileHandler.readFromFile(filePath);
-            ChaosGame chaosGame = new ChaosGame(description, 1000, 800); // Assuming canvas size is 400x300
+            ChaosGame chaosGame = new ChaosGame(description, 1000, 800); // canvas size
             chaosGame.runSteps(maxIterations); // Run with maximum iterations
             ChaosCanvas canvas = chaosGame.getCanvas();
             int[][] canvasArray = canvas.getCanvasArray();
 
-            // Create a StringBuilder to build the output string
-            StringBuilder outputBuilder = new StringBuilder();
+            StringBuilder outputBuilder = new StringBuilder(); // StringBuilder to build the output string
 
-            // Iterate over the canvas array and build the output string
+            // Iterating over the canvas array and building the output string
             for (int i = 0; i < canvasArray.length; i++) {
                 for (int j = 0; j < canvasArray[i].length; j++) {
-                    outputBuilder.append(canvasArray[i][j] == 1 ? "X" : " "); // Use "X" for colored pixels and space for blank pixels
+                    // "X" for colored pixels and space for blank pixels
+                    outputBuilder.append(canvasArray[i][j] == 1 ? "X" : " ");
                 }
                 outputBuilder.append("\n"); // New line to start next row
             }
 
-            // Print the output string to the console
-            System.out.println(outputBuilder); //.toString());
+            // Printing the output string to the console:
+            System.out.println(outputBuilder);
         } catch (IOException e) {
             e.printStackTrace();
         }
