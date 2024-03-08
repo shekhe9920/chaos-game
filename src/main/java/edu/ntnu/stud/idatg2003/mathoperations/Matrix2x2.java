@@ -3,7 +3,7 @@ package edu.ntnu.stud.idatg2003.mathoperations;
 /**
  * {@code Matrix2x2} is a class representing a 2x2 matrix.
  *
- * @version 0.0.0
+ * @version 0.0.1
  * @since 0.0.0
  */
 public class Matrix2x2 {
@@ -53,5 +53,15 @@ public class Matrix2x2 {
     double resultX0 = matrix[0][0] * vector.getX0() + matrix[0][1] * vector.getX1();
     double resultX1 = matrix[1][0] * vector.getX0() + matrix[1][1] * vector.getX1();
     return new Vector2D(resultX0, resultX1);
+  }
+
+
+  public double[][] getMatrix() {
+    return matrix;
+  }
+
+
+  public double getElement(int row, int column) {
+    return matrix[row][column];
   }
 }
