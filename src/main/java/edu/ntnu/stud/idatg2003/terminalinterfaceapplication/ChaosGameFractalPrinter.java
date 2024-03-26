@@ -1,13 +1,9 @@
 package edu.ntnu.stud.idatg2003.terminalinterfaceapplication;
 
-
-import static edu.ntnu.stud.idatg2003.filehandling.ChaosGameFileHandler.readJuliaTransformsFromFile;
-
-import edu.ntnu.stud.idatg2003.engine.ChaosCanvas;
 import edu.ntnu.stud.idatg2003.filehandling.ChaosGameFileHandler;
 import java.io.IOException;
-import edu.ntnu.stud.idatg2003.engine.ChaosGameDescription;
-import edu.ntnu.stud.idatg2003.engine.ChaosGame;
+import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
+import edu.ntnu.stud.idatg2003.backend.engine.ChaosGame;
 
 /**
  * The {@code ChaosGameFractalPrinter} class provides a main method
@@ -18,40 +14,38 @@ import edu.ntnu.stud.idatg2003.engine.ChaosGame;
  */
 public class ChaosGameFractalPrinter {
 
+
+  // The file path to the text file containing the chaos game descriptions:
+  private static final String TEXT_FILE_PATH = "src/main/resources/txtfiles/";
+
+  private static final int MAX_ITERATIONS = 100000; // The maximum number of iterations
+  private static final int CANVAS_WIDTH = 500; // The width of the canvas
+  private static final int CANVAS_HEIGHT = 175; // The height of the canvas
+
+
+
+
+
   /**
    * Prints a fractal based on the chaos game description in the specified file.
    *
    * @param filePath      The path to the file containing the chaos game description.
-   * @param maxIterations The maximum number of iterations to run the chaos game.
    * @since 0.0.1
    */
-  public static void printFractalFromDescription(String filePath, int maxIterations) {
-    ChaosGameFileHandler fileHandler = new ChaosGameFileHandler();
+  public static void printFractalFromDescription(String filePath) {
     try {
-      ChaosGameDescription description = fileHandler.readFromFile(filePath);
-      //ChaosGameDescription description = readJuliaTransformsFromFile(filePath);
-      ChaosGame chaosGame = new ChaosGame(description, 200, 100); // canvas size
-      chaosGame.runSteps(maxIterations);
-      ChaosCanvas canvas = chaosGame.getCanvas();
-      int[][] canvasArray = canvas.getCanvasArray();
+      ChaosGameDescription description = ChaosGameFileHandler.readFile(filePath);
+      ChaosGame chaosGame = new ChaosGame(description, CANVAS_WIDTH, CANVAS_HEIGHT);
+      chaosGame.runSteps(MAX_ITERATIONS);
 
-      StringBuilder outputBuilder = new StringBuilder(); // StringBuilder to build the output string
 
-      // Iterating over the canvas array and building the output string:
-      for (int i = 0; i < canvasArray.length; i++) {
-        for (int j = 0; j < canvasArray[i].length; j++) {
-          // "X" for colored pixels and space for blank pixels:
-          outputBuilder.append(canvasArray[i][j] == 1 ? "X" : " ");
-        }
-        outputBuilder.append("\n"); // New line to start next row
-      }
-
-      // Printing the output string to the console:
-      System.out.println(outputBuilder);
+      chaosGame.printFractal();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
+
+
 
 
   /**
@@ -61,10 +55,9 @@ public class ChaosGameFractalPrinter {
    * @since 0.0.1
    */
   public static void main(String[] args) {
-    String filePath = "barnsley-fern.txt";
-    //String filePath = "sierpinski.txt"; // The file path to the desired transformation file
-    int maxIterations = 1000000; // The maximum number of iterations
-    printFractalFromDescription(filePath, maxIterations);
+    printFractalFromDescription(TEXT_FILE_PATH + "sierpinski.txt.txt");
+    printFractalFromDescription(TEXT_FILE_PATH + "julia.txt.txt");
+    printFractalFromDescription(TEXT_FILE_PATH + "barnsley-fern.txt");
   }
 
 }

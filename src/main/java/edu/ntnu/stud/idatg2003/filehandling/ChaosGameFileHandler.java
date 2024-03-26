@@ -1,147 +1,165 @@
 package edu.ntnu.stud.idatg2003.filehandling;
 
-import edu.ntnu.stud.idatg2003.engine.ChaosGameDescription;
-import edu.ntnu.stud.idatg2003.mathoperations.Complex;
-import edu.ntnu.stud.idatg2003.mathoperations.Matrix2x2;
-import edu.ntnu.stud.idatg2003.mathoperations.Vector2D;
-import edu.ntnu.stud.idatg2003.transformation.AffineTransform2D;
-import edu.ntnu.stud.idatg2003.transformation.JuliaTransform;
-import edu.ntnu.stud.idatg2003.transformation.Transform2D;
-
-import java.io.*;
+import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
+import edu.ntnu.stud.idatg2003.backend.mathoperations.Complex;
+import edu.ntnu.stud.idatg2003.backend.mathoperations.Matrix2x2;
+import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
+import edu.ntnu.stud.idatg2003.backend.transformations.JuliaTransform;
+import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
+import java.util.stream.Stream;
+
+
 
 /**
- * The {@code ChaosGameFileHandler} class provides methods for reading and writing chaos game descriptions
- * from/to files.
+ * Provides functionality for persisting and retrieving {@link ChaosGameDescription}
+ * instances to and from files.
+ * This class allows chaos game configurations, including transformations and drawing bounds,
+ * to be saved to a file for later use, or loaded from a file to recreate a game state.
+ * It supports both affine transformations and Julia sets,
+ * identifying the correct type based on the file content.
  *
- * @version 0.0.1
- * @since 0.0.1
+ * @version 0.0.3
+ * @since 0.0.1 (The version of ChaosGameEngine application when introduced)
  */
 public class ChaosGameFileHandler {
 
+
+
+
   /**
-   * Reads a chaos game description from the specified file.
+   * Reads a chaos game description from a specified file path.
+   * The file is expected to contain a specific format where the first line indicates the type of
+   * fractal, followed by the coordinates defining the drawing area,
+   * and then the transformation details.
+   * Lines starting with "#" are treated as comments and ignored.
    *
-   * @param path The path to the file to read.
-   * @return A {@code ChaosGameDescription} object representing the chaos game description.
-   * @throws FileNotFoundException If the file is not found.
-   * @throws IllegalArgumentException If the file format is invalid.
-   * @since 0.0.1
+   * @param path The file path from which to read the chaos game description.
+   * @return A {@link ChaosGameDescription} populated with the data read from the file.
+   * @throws IOException If an error occurs during file reading or if the file format is incorrect.
+   * @since 0.0.3
    */
+  public static ChaosGameDescription readFile(String path) throws IOException {
+    try (Scanner fileScanner = new Scanner(new File(path))) {
+      fileScanner.useLocale(Locale.ENGLISH);
 
-  public static ChaosGameDescription readFromFile(String path) throws FileNotFoundException {
-    try (Scanner scanner = new Scanner(new File(path))) {
-      // Skip comment line
-      scanner.nextLine();
+      // Extracting the type of fractal (Affine2D or Julia):
+      String transformationType = fileScanner.nextLine().split("#")[0].trim();
 
-      // Read min coordinates
-      String[] minCoordsLine = scanner.nextLine().split("#")[0].split(",");
-      double x0Min = Double.parseDouble(minCoordsLine[0].trim());
-      double x1Min = Double.parseDouble(minCoordsLine[1].trim());
-      Vector2D minCoords = new Vector2D(x0Min, x1Min);
 
-      // Read max coordinates
-      String[] maxCoordsLine = scanner.nextLine().split("#")[0].split(",");
-      double x0Max = Double.parseDouble(maxCoordsLine[0].trim());
-      double x1Max = Double.parseDouble(maxCoordsLine[1].trim());
-      Vector2D maxCoords = new Vector2D(x0Max, x1Max);
+      // Processing the coordinates for the lower left corner, ignoring comments:
+      String[] lowerLeftValues =
+          fileScanner.nextLine().split("#")[0].trim().split(",");
 
-      // Read transformations
-      List<Transform2D> transformations = new ArrayList<>();
-      while (scanner.hasNextLine()) {
-        String line = scanner.nextLine().trim();
-        // Skip empty lines and comments
-        if (line.isEmpty() || line.startsWith("#")) {
-          continue;
+      Vector2D minCoords =
+          new Vector2D(
+              Double.parseDouble(lowerLeftValues[0].trim()),
+              Double.parseDouble(lowerLeftValues[1].trim()));
+
+      // Processing the coordinates for the upper right corner, ignoring comments:
+      String[] upperRightValues =
+          fileScanner.nextLine().split("#")[0].trim().split(",");
+
+      Vector2D maxCoords =
+          new Vector2D(
+              Double.parseDouble(upperRightValues[0].trim()),
+              Double.parseDouble(upperRightValues[1].trim()));
+
+
+      List<Transform2D> transforms = new ArrayList<>();
+      while (fileScanner.hasNextLine()) {
+        String line = fileScanner.nextLine();
+
+        if (line.startsWith("#") || line.trim().isEmpty()) {
+          continue; // Skipping comments and empty lines
         }
-        String[] transformParams = line.split("#")[0].split(",");
-        double a00 = Double.parseDouble(transformParams[0].trim());
-        double a01 = Double.parseDouble(transformParams[1].trim());
-        double a10 = Double.parseDouble(transformParams[2].trim());
-        double a11 = Double.parseDouble(transformParams[3].trim());
-        double b0 = Double.parseDouble(transformParams[4].trim());
-        double b1 = Double.parseDouble(transformParams[5].trim());
-        transformations.add(new AffineTransform2D(
-            new Matrix2x2(new double[][]{{a00, a01}, {a10, a11}}),
-            new Vector2D(b0, b1)));
+
+        // Splitting the line on '#' to remove comments, then split on ',' to get numeric values:
+        String[] numericValues = line.split("#")[0].trim().split(",");
+
+        // Handling different transformation types based on the fractal type specified:
+        if (transformationType.equals("Affine2D")) {
+          double[] matrixValues = Stream.of(numericValues)
+              .map(String::trim)
+              .mapToDouble(Double::parseDouble)
+              .toArray();
+
+          if (matrixValues.length == 6) {
+            Matrix2x2 matrix =
+                new Matrix2x2(matrixValues[0], matrixValues[1], matrixValues[2], matrixValues[3]);
+            Vector2D vector =
+                new Vector2D(matrixValues[4], matrixValues[5]);
+
+            transforms.add(new AffineTransform2D(matrix, vector));
+          } else {
+            throw new IOException(
+                    "Incorrect number of values for Affine2D transformation on one of the lines.");
+          }
+
+          // Handling Julia transformations:
+        } else if (transformationType.equals("Julia")) {
+          if (numericValues.length == 2) {
+            Complex constant =
+                new Complex(Double.parseDouble(numericValues[0].trim()),
+                    Double.parseDouble(numericValues[1].trim()));
+
+            // Adding two Julia transformations with opposite signs to the list:
+            transforms.add(new JuliaTransform(constant, 1));
+            transforms.add(new JuliaTransform(constant, -1));
+          } else {
+            throw new IOException(
+                    "Incorrect number of values for Julia transformation on one of the lines.");
+          }
+        }
+
+
       }
-
-      return new ChaosGameDescription(transformations, minCoords, maxCoords);
+      return new ChaosGameDescription(minCoords, maxCoords, transforms);
     }
+
   }
 
 
-  /**
-   * Reads a chaos game description from a file containing Julia transforms.
-   *
-   * @param filePath The path to the file to read.
-   * @return A {@code ChaosGameDescription} object representing the chaos game description.
-   * @throws FileNotFoundException If the file is not found.
-   * @since 0.0.1
-   */
 
-  public static ChaosGameDescription readJuliaTransformsFromFile(String filePath) throws FileNotFoundException {
-    try (Scanner scanner = new Scanner(new File(filePath))) {
-      scanner.nextLine(); // Skip comment line
-      // Read min coordinates
-      String[] minCoordsLine = scanner.nextLine().split("#")[0].split(",");
-      double x0Min = Double.parseDouble(minCoordsLine[0].trim());
-      double x1Min = Double.parseDouble(minCoordsLine[1].trim());
-      Vector2D minCoords = new Vector2D(x0Min, x1Min);
 
-      // Read max coordinates
-      String[] maxCoordsLine = scanner.nextLine().split("#")[0].split(",");
-      double x0Max = Double.parseDouble(maxCoordsLine[0].trim());
-      double x1Max = Double.parseDouble(maxCoordsLine[1].trim());
-      Vector2D maxCoords = new Vector2D(x0Max, x1Max);
-
-      // Read constant c
-      String[] cValues = scanner.nextLine().split("#")[0].split(",");
-      double cReal = Double.parseDouble(cValues[0].trim());
-      double cImaginary = Double.parseDouble(cValues[1].trim());
-
-      return new ChaosGameDescription(
-          Collections.singletonList(new JuliaTransform(new Complex(cReal, cImaginary), 1)),
-          minCoords, maxCoords);
-    }
-  }
 
 
   /**
-   * Writes the given chaos game description to the specified file.
+   * Writes the given {@link ChaosGameDescription} to a file at the specified path.
+   * The output file will contain the fractal type, the drawing area coordinates,
+   * and details of each transformation in a format compatible with {@link #readFile(String)}.
    *
-   * @param chaosGameDescription The {@code ChaosGameDescription} object to write.
-   * @param path                 The path to the file to write to.
-   * @throws IOException If an I/O error occurs.
+   * @param description The chaos game description to write to the file.
+   * @param path The file path where the description should be saved.
+   * @throws IOException If an error occurs during file writing.
    * @since 0.0.1
    */
-  public static void writeToFile(ChaosGameDescription chaosGameDescription, String path)
-      throws IOException {
+  public static void writeToFile(ChaosGameDescription description, String path) throws IOException {
+    try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path))) {
 
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
-      // Write the type of fractal
       writer.write("Affine2D\n");
+      writer.write(description.getMinCoords().getX0() + ","
+          + description.getMinCoords().getX1() + "\n");
+      writer.write(description.getMaxCoords().getX0() + ","
+          + description.getMaxCoords().getX1() + "\n");
 
-      // Write min and max coordinates
-      writer.write(String.format("%f, %f%n", chaosGameDescription.getMinCoords().getX0(),
-          chaosGameDescription.getMinCoords().getX1()));
-      writer.write(String.format("%f, %f%n", chaosGameDescription.getMaxCoords().getX0(),
-          chaosGameDescription.getMaxCoords().getX1()));
-
-      // Write transformations
-      for (Transform2D transformation : chaosGameDescription.getTransformations()) {
-        if (transformation instanceof AffineTransform2D) {
-          Matrix2x2 matrix = ((AffineTransform2D) transformation).getMatrix();
-          Vector2D vector = ((AffineTransform2D) transformation).getVector();
-          writer.write(String.format("%f, %f, %f, %f, %f, %f%n",
-              matrix.getElement(0, 0), matrix.getElement(0, 1),
-              matrix.getElement(1, 0), matrix.getElement(1, 1),
-              vector.getX0(), vector.getX1())
-          );
+      for (Transform2D transform : description.getTransformations()) {
+        // Here we need to cast to the expected transform type to access its properties:
+        if (transform instanceof AffineTransform2D affine) {
+          Matrix2x2 matrix = affine.getMatrix();
+          Vector2D vector = affine.getVector();
+          writer.write(matrix.getA00() + "," + matrix.getA01() + ","
+              + matrix.getA10() + "," + matrix.getA11() + ","
+              + vector.getX0() + "," + vector.getX1() + "\n");
         }
       }
     }

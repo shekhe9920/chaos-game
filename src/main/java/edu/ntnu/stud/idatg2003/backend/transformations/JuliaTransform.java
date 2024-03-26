@@ -1,19 +1,24 @@
-package edu.ntnu.stud.idatg2003.transformation;
+package edu.ntnu.stud.idatg2003.backend.transformations;
 
-import edu.ntnu.stud.idatg2003.mathoperations.Complex;
-import edu.ntnu.stud.idatg2003.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.mathoperations.Complex;
+import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 
 /**
  * The {@code JuliaTransform} class represents a complex transformation of the form
  * z -> ±sqrt(z - c), where z is a complex number, and c is a complex constant.
  *
- * @version 0.0.1
- * @since 0.0.0
+ * @version 0.0.2
+ * @since 0.0.0 (The version of ChaosGameEngine application when introduced)
  */
 public class JuliaTransform implements Transform2D {
 
+
+
   private Complex point; // Represents the complex constant 'c'
   private int sign;      // Represents the sign of the transformation, which must be either 1 or -1
+
+
+
 
   /**
    * Constructs a new {@code JuliaTransform} object with the given complex constant 'c' and sign.
@@ -24,9 +29,29 @@ public class JuliaTransform implements Transform2D {
    * @since 0.0.0
    */
   public JuliaTransform(Complex point, int sign) {
-    this.point = point;
+    setPoint(point);
     setSign(sign);
   }
+
+
+
+
+  /**
+   * Sets the point of the transformation vector.
+   *
+   * @param point The point to set, which must be a Complex object and not null.
+   * @throws IllegalArgumentException If the point is null, or not a Complex object.
+   * @since 0.0.2
+   */
+  private void setPoint(Complex point) {
+    if (point != null) {
+      this.point = point;
+    } else {
+      throw new IllegalArgumentException("Point must be a Complex object and not null");
+    }
+  }
+
+
 
 
   /**
@@ -43,6 +68,9 @@ public class JuliaTransform implements Transform2D {
       throw new IllegalArgumentException("Sign must be 1 or -1");
     }
   }
+
+
+
 
   /**
    * Gets the sign of the Julia transformation vector.
@@ -69,29 +97,18 @@ public class JuliaTransform implements Transform2D {
    */
   @Override
   public Vector2D transform(Vector2D z) {
-    Complex complexZ = new Complex(z.getX0(), z.getX1()); // TODO: Maybe use toComplex method from Complex class instead of this line
-    Complex zMinusC = (Complex) complexZ.subtract(point); // Calculate z - c
+    Complex complexZ = new Complex(z.getX0(), z.getX1());
+    Complex zMinusC = (Complex) complexZ.subtract(point); // Calculating z - c
 
-    // Calculating the magnitude for the real and imaginary parts separately
-    double magnitude =
-        Math.sqrt(zMinusC.getX0() * zMinusC.getX0() + zMinusC.getX1() * zMinusC.getX1());
+    Complex newComplex = zMinusC.sqrt();  // Calculating the square root of z - c
 
-    double newReal;
-    double newImaginary;
+    double newReal = newComplex.getX0();  // the real part of the square root
+    double newImaginary = newComplex.getX1();  // the imaginary part of the square root
 
-    // Handling the case when zMinusC.x0 < 0 and zMinusC.x1 = 0
-    if (zMinusC.getX0() < 0 && zMinusC.getX1() == 0) {
-      newReal = 0;
-      newImaginary = Math.sqrt(Math.abs(zMinusC.getX0()));
-    } else {
-      newReal = Math.sqrt(0.5 * (magnitude + zMinusC.getX0()));
-      newImaginary = Math.signum(zMinusC.getX1()) * Math.sqrt(0.5 * (magnitude - zMinusC.getX0()));
-    }
-
-    // Checking if both newReal and newImaginary are zero
+    // Checking if both newReal and newImaginary are zero:
     if (newReal == 0 && newImaginary == 0) {
       return new Vector2D(0, 0);
-    } else if (newReal == 0) { // Check if newReal is zero, to avoid "-0.0" in the output
+    } else if (newReal == 0) { // Checking if newReal is zero to avoid "-0.0" output when debugging
       return new Vector2D(0, sign * newImaginary);
     }
 
