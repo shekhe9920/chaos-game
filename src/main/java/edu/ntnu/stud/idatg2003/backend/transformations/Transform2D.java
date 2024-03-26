@@ -1,6 +1,6 @@
-package edu.ntnu.stud.idatg2003.transformation;
+package edu.ntnu.stud.idatg2003.backend.transformations;
 
-import edu.ntnu.stud.idatg2003.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 
 /**
  * The {@code Transform2D} interface represents a 2-dimensional transformation.
@@ -8,8 +8,8 @@ import edu.ntnu.stud.idatg2003.mathoperations.Vector2D;
  * as an input and returns a new 2-dimensional vector as an output.
  * The transformation is defined by the implementing classes.
  *
- * @version 0.0.1
- * @since 0.0.0
+ * @version 0.0.0
+ * @since 0.0.0 (The version of ChaosGameEngine application when introduced)
  */
 public interface Transform2D {
 

@@ -1,0 +1,7 @@
+Julia      # Type of fractal
+-1.6, -1   # Lower left, (x_0min, x_1min)
+1.6, 1     # Upper right, (x_0max, x_1max)
+-0.74543, 0.11301    # 1st transform (Real and imaginary parts of the constant)
+#0.4, 0.4            # 2nd transform
+#0.35, 0.35          # 3rd transform
+#-0.8, 0.156         # 4th transform
