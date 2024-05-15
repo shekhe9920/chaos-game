@@ -32,6 +32,9 @@ public class JuliaSetView extends FractalView {
   private TextField cReField;
   private TextField cImField;
 
+
+
+
   /**
    * Constructor for JuliaSetView.
    *
@@ -45,6 +48,9 @@ public class JuliaSetView extends FractalView {
     setupUI();
   }
 
+
+
+
   /**
    * Draws the initial fractal on the canvas.
    *
@@ -54,10 +60,17 @@ public class JuliaSetView extends FractalView {
    */
   @Override
   protected void drawInitialFractal(int width, int height) {
-    ChaosGameDescription description = ChaosGameDescriptionFactory.createJuliaSetDescription(new Complex(-0.74543, 0.11301));
+    ChaosGameDescription description =
+        ChaosGameDescriptionFactory.createJuliaSetDescription(
+            new Complex(-0.74543, 0.11301)
+        );
+
     controller.initializeGame(description, width, height, DEFAULT_STEPS);
     drawFractal(canvas);
   }
+
+
+
 
   /**
    * Displays a dialog to select a predefined Julia set fractal.
@@ -74,7 +87,7 @@ public class JuliaSetView extends FractalView {
     );
 
     List<String> setNames = predefinedSets.stream().map(Pair::getKey).collect(Collectors.toList());
-    ChoiceDialog<String> dialog = new ChoiceDialog<>(setNames.get(0), setNames);
+    ChoiceDialog<String> dialog = new ChoiceDialog<>(setNames.getFirst(), setNames);
     dialog.setTitle("Predefined Julia Sets");
     dialog.setHeaderText("Select a predefined Julia Set fractal:");
     dialog.setContentText("Available Julia Sets:");
@@ -89,6 +102,9 @@ public class JuliaSetView extends FractalView {
     });
   }
 
+
+
+
   /**
    * Loads the Julia set fractal with the given complex number.
    *
@@ -100,6 +116,9 @@ public class JuliaSetView extends FractalView {
     cImField.setText(Double.toString(c.getX1()));
     updateFractal();
   }
+
+
+
 
   /**
    * Creates a menu item for opening a fractal configuration from a file.
@@ -124,6 +143,9 @@ public class JuliaSetView extends FractalView {
     });
     return openConfig;
   }
+
+
+
 
   /**
    * Creates a menu item for saving the current fractal configuration to a file.
@@ -156,6 +178,9 @@ public class JuliaSetView extends FractalView {
     return saveConfig;
   }
 
+
+
+
   /**
    * Sets up the settings pane for the Julia set fractal.
    *
@@ -169,6 +194,9 @@ public class JuliaSetView extends FractalView {
     scrollPane.prefWidth(settingsPane.getWidth());
     setRight(scrollPane);
   }
+
+
+
 
   /**
    * Creates the fractal options pane with settings for Julia sets.
@@ -199,19 +227,26 @@ public class JuliaSetView extends FractalView {
     Button showPredefinedJuliaSetsButton = new Button("Show Predefined Julia Sets");
     showPredefinedJuliaSetsButton.setOnAction(e -> showPredefinedFractalDialog());
 
+    Button editWeightsButton = new Button("Edit Transformation Weight Probabilities");
+    editWeightsButton.setOnAction(e -> showEditWeightsDialog());
+
     settingsBox.getChildren().addAll(
         cBox,
         minCoordsBox,
         maxCoordsBox,
         stepsBox,
         updateFractalButton,
-        showPredefinedJuliaSetsButton
+        showPredefinedJuliaSetsButton,
+        editWeightsButton
     );
 
     settingsPane = new TitledPane("Fractal Controller", settingsBox);
     settingsPane.setCollapsible(true);
     return settingsPane;
   }
+
+
+
 
   /**
    * Updates the UI with the provided fractal description.
@@ -224,6 +259,9 @@ public class JuliaSetView extends FractalView {
     // Implement specific UI update if needed for Julia Set
   }
 
+
+
+
   /**
    * Updates the fractal with the current settings.
    *
@@ -234,6 +272,7 @@ public class JuliaSetView extends FractalView {
     double realPart = parseTextFieldToDouble(cReField);
     double imaginaryPart = parseTextFieldToDouble(cImField);
     Complex c = new Complex(realPart, imaginaryPart);
+    List<Double> currentWeights = controller.getGame().getWeights();
 
     int steps = parseTextFieldToInt(stepsField);
 
@@ -247,6 +286,8 @@ public class JuliaSetView extends FractalView {
     controller.updateJuliaSetGame(steps, minCoords, maxCoords, c);
     controller.initializeGame(controller.getCurrentGameDescription(),
         (int) canvas.getWidth(), (int) canvas.getHeight(), steps);
+    controller.updateGameWithWeights(controller.getCurrentGameDescription(), steps, currentWeights);
+
     drawFractal(canvas);
   }
 }

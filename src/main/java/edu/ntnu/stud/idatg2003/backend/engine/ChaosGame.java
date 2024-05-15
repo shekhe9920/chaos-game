@@ -2,11 +2,10 @@ package edu.ntnu.stud.idatg2003.backend.engine;
 
 import edu.ntnu.stud.idatg2003.backend.ChaosGameObserver;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.utilitiesbackend.WeightedRandomSampler;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
 
 /**
  * Represents a chaos game for generating fractals through iterative application of transformations.
@@ -15,11 +14,10 @@ import java.util.Random;
  * Observers can be attached to monitor changes in the game's state,
  * such as updates to the game description.
  *
- * @version 0.0.4
+ * @version 0.0.5
  * @since 0.0.1 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGame {
-
 
   // List of observers monitoring the game's state:
   private final List<ChaosGameObserver> observers = new ArrayList<>();
@@ -27,9 +25,10 @@ public class ChaosGame {
   private ChaosGameDescription description; // Description of the chaos game
   private final ChaosCanvas canvas; // Canvas for drawing the fractal
   private Vector2D currentPoint; // Current point in the fractal space
-  private final Random random; // Random number generator for selecting transformations
   private int lastRunSteps = 0; // Number of steps in the last run of the game
 
+  private List<Double> weights;    // Weights for selecting transformations
+  private WeightedRandomSampler weightedRandom;  // Random sampler for selecting transformations
 
 
 
@@ -46,13 +45,12 @@ public class ChaosGame {
    * @since 0.0.1
    */
   public ChaosGame(ChaosGameDescription description, int width, int height) {
-    this.canvas =
-        new ChaosCanvas(width, height, description.getMinCoords(), description.getMaxCoords());
+    this.canvas = new ChaosCanvas(width, height, description.getMinCoords(), description.getMaxCoords());
     this.description = description;
-    this.random = new Random();
+    this.weights = new ArrayList<>();
+    this.weightedRandom = new WeightedRandomSampler(weights);
     this.currentPoint = new Vector2D(0, 0); // Starting point, which can be customized
   }
-
 
 
 
@@ -74,6 +72,36 @@ public class ChaosGame {
 
 
   /**
+   * Sets the weights for the transformations.
+   *
+   * @param weights The weights for the transformations.
+   * @since 0.0.5
+   */
+  public void setTransformWeights(List<Double> weights) {
+    if (weights == null || weights.isEmpty()) {
+      throw new IllegalArgumentException("Weights cannot be null or empty");
+    }
+    this.weights = weights;
+    this.weightedRandom = new WeightedRandomSampler(weights);
+  }
+
+
+
+
+  /**
+   * Retrieves the weights used for selecting transformations during the chaos game.
+   *
+   * @return The list of weights for the transformations.
+   * @since 0.0.5
+   */
+  public List<Double> getWeights() {
+    return weights;
+  }
+
+
+
+
+  /**
    * Executes the chaos game for a specified number of steps.
    * At each step, a transformation is randomly selected and applied to the current point,
    * and the result is drawn on the canvas.
@@ -83,24 +111,21 @@ public class ChaosGame {
    * @since 0.0.1
    */
   public void runSteps(int steps) {
+    if (weights == null || weights.isEmpty()) {
+      throw new IllegalStateException("Weights are not set.");
+    }
+
     lastRunSteps = steps; // Storing the number of steps for later retrieval
 
     for (int i = 0; i < steps; i++) {
-      // Randomly selecting a transformation from the list:
-      Transform2D transformation =
-          description.getTransformations()
-          .get(random.nextInt(description.getTransformations().size()));
+      int index = weightedRandom.nextIndex();
+      Transform2D transformation = description.getTransformations().get(index);
 
-      // Applying the transformation to the current point:
       currentPoint = transformation.transform(currentPoint);
       canvas.putPixel(currentPoint, 1); // '1' is the color value for a plotted point
     }
     notifyObserversGameUpdated(); // Notifying observers only once after all steps
   }
-
-
-
-
 
 
 
@@ -114,7 +139,6 @@ public class ChaosGame {
   public int getSteps() {
     return lastRunSteps;
   }
-
 
 
 
@@ -249,6 +273,7 @@ public class ChaosGame {
 
 
 
+
   /**
    * Notifies all registered observers that the chaos game has been updated.
    * This method is called after each iteration or significant update to the game state.
@@ -260,6 +285,7 @@ public class ChaosGame {
       observer.onChaosGameUpdated();
     }
   }
+
 
 
 
@@ -281,4 +307,3 @@ public class ChaosGame {
   }
 
 }
-

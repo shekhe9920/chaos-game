@@ -7,6 +7,8 @@ import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 import edu.ntnu.stud.idatg2003.frontend.controllers.ChaosGameController;
 import edu.ntnu.stud.idatg2003.frontend.controllers.MainViewController;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -122,6 +124,9 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     setTop(menuBar);
   }
 
+
+
+
   /**
    * Draws the fractal on the canvas based on the current hit counts.
    *
@@ -137,18 +142,23 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     int[][] hitCounts = controller.getGame().getCanvas().getHitCounts();
     int maxHits = getMaxHits(hitCounts);
 
-    gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    // Fylle hele canvas med bakgrunnsfargen
+    Color backgroundColor = Color.WHITE; // The background color of the canvas
+    gc.setFill(backgroundColor);
+    gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+    // Tegner fraktalen basert på hitCounts
     for (int i = 0; i < hitCounts.length; i++) {
       for (int j = 0; j < hitCounts[i].length; j++) {
         if (hitCounts[i][j] > 0) {
           double intensity = (double) hitCounts[i][j] / maxHits;
-          gc.setFill(Color.gray(intensity));
+          gc.setFill(getColorForIntensity(intensity));
           gc.fillRect(j, canvas.getHeight() - i, 1, 1);
         }
       }
     }
   }
+
 
 
 
@@ -159,7 +169,7 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @return the maximum hit count
    * @since 0.0.3
    */
-  public static int getMaxHits(int[][] hitCounts) {
+  private int getMaxHits(int[][] hitCounts) {
     int maxHits = 1;
     for (int[] row : hitCounts) {
       for (int hitCount : row) {
@@ -171,6 +181,24 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     return maxHits;
   }
 
+
+
+
+  /**
+   * Gets a color based on the intensity value.
+   *
+   * @param intensity the intensity value
+   * @return the color for the intensity
+   * @since 0.0.6
+   */
+  private Color getColorForIntensity(double intensity) {
+    // Using HSV to RGB conversion for a smooth transition from blue to red
+    return Color.hsb(240 * (1 - intensity), 1.0, 1.0);
+  }
+
+
+
+
   /**
    * Updates the UI elements based on the given chaos game description.
    *
@@ -179,6 +207,9 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    */
   protected abstract void updateUIWithDescription(ChaosGameDescription description);
 
+
+
+
   /**
    * Creates a menu item for opening a configuration file.
    *
@@ -186,6 +217,9 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @since 0.0.1
    */
   protected abstract MenuItem createOpenConfigMenuItem();
+
+
+
 
   /**
    * Creates a menu item for saving a configuration file.
@@ -217,6 +251,8 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
   protected abstract void updateFractal();
 
 
+
+
   /**
    * When the chaos game is updated, redraw the fractal on the canvas.
    *
@@ -226,6 +262,8 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
   public void onChaosGameUpdated() {
     Platform.runLater(() -> drawFractal(canvas));
   }
+
+
 
 
   /**
@@ -270,7 +308,7 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     HBox stepsBox = new HBox(new Label("Steps:"), stepsField);
     stepsBox.setAlignment(Pos.CENTER_LEFT);
 
-    // Legg til lytter på tekstfeltet for å oppdatere fraktalen
+    // adding listener to update the game when step value changes
     stepsField.textProperty().addListener((observable, oldValue, newValue) -> {
       try {
         int steps = Integer.parseInt(newValue);
@@ -286,6 +324,8 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
 
     settingsBox.getChildren().add(stepsBox);
   }
+
+
 
 
   /**
@@ -323,6 +363,9 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     settingsBox.getChildren().addAll(coordinatesTitle, coordinatesContainer);
   }
 
+
+
+
   /**
    * Updates the size of the canvas.
    *
@@ -336,6 +379,9 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     setupCanvas(width, height);
     updateFractal();
   }
+
+
+
 
   /**
    * Shows a dialog for resizing the canvas.
@@ -379,6 +425,9 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     });
   }
 
+
+
+
   /**
    * Loads the coordinates from the given description into the UI fields.
    *
@@ -393,4 +442,71 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
       maxYField.setText(String.valueOf(description.getMaxCoords().getX1()));
     }
   }
+
+
+
+
+  /**
+   * Shows a dialog for editing the transformation selection probability.
+   *
+   * @since 0.0.6
+   */
+  protected void showEditWeightsDialog() {
+    Dialog<Void> dialog = new Dialog<>();
+    dialog.setTitle("Edit Transformation Selection Probability");
+    dialog.setHeaderText("Edit the weights for each transformation:");
+
+    ButtonType applyButtonType = new ButtonType("Apply", ButtonBar.ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(applyButtonType, ButtonType.CANCEL);
+
+    VBox weightFieldsBox = new VBox(10);
+    List<TextField> weightFields = new ArrayList<>();
+    List<Double> weights = controller.getGame().getWeights();
+
+    for (int i = 0; i < weights.size(); i++) {
+      TextField weightField = new TextField(String.format("%.2f", weights.get(i) * 100));
+      weightFields.add(weightField);
+      HBox hBox = new HBox(10, new Label("Weight " + (i + 1) + ":"), weightField);
+      weightFieldsBox.getChildren().add(hBox);
+    }
+
+    dialog.getDialogPane().setContent(weightFieldsBox);
+
+    dialog.setResultConverter(dialogButton -> {
+      if (dialogButton == applyButtonType) {
+        for (int i = 0; i < weightFields.size(); i++) {
+          try {
+            double weight = Double.parseDouble(weightFields.get(i).getText()) / 100.0;
+            weights.set(i, weight);
+          } catch (NumberFormatException e) {
+            System.err.println("Invalid weight value: " + weightFields.get(i).getText());
+          }
+        }
+        normalizeWeights(weights);
+        controller.setTransformWeights(weights); // saving the new weights
+        updateFractal();
+        System.out.println("Updated weights: " + weights);
+      }
+      return null;
+    });
+
+    dialog.showAndWait();
+  }
+
+
+
+
+  /**
+   * Normalizes the weights to sum up to 1.
+   *
+   * @param weights the list of weights
+   * @since 0.0.6
+   */
+  private void normalizeWeights(List<Double> weights) {
+    double total = weights.stream().mapToDouble(Double::doubleValue).sum();
+    weights.replaceAll(aDouble -> aDouble / total);
+  }
+
+
+
 }

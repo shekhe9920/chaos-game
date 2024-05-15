@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * View class for displaying and interacting with affine transformation fractals.
  *
- * @version 0.0.5
+ * @version 0.0.6
  * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public class AffineTransformView extends FractalView {
@@ -98,7 +98,7 @@ public class AffineTransformView extends FractalView {
     VBox settingsBox = new VBox(10);
     settingsBox.setPadding(new Insets(10));
 
-    // Set up fields for fractal coordinates and steps
+    // fields for fractal coordinates and steps
     setupCoordinateFields(settingsBox);
     setupStepsField(settingsBox);
 
@@ -113,12 +113,16 @@ public class AffineTransformView extends FractalView {
     Button addTransformationButton = new Button("Edit Transformation Matrix and Vector");
     addTransformationButton.setOnAction(e -> editTransformation());
 
+    Button editWeightsButton = new Button("Edit Transformation Weight Probabilities");
+    editWeightsButton.setOnAction(e -> showEditWeightsDialog());
+
     settingsBox.getChildren().addAll(
         new Label("Transformations:"),
         transformationsBox,
         updateFractalButton,
         showPredefinedAffineTransformsButton,
-        addTransformationButton
+        addTransformationButton,
+        editWeightsButton
     );
 
     settingsPane = new TitledPane("Fractal Controller", settingsBox);
@@ -193,7 +197,7 @@ public class AffineTransformView extends FractalView {
   protected void showPredefinedFractalDialog() {
     List<String> predefinedSets = List.of(SIERPINSKI_TRIANGLE, BARNSLEYFERN);
 
-    ChoiceDialog<String> dialog = new ChoiceDialog<>(predefinedSets.get(0), predefinedSets);
+    ChoiceDialog<String> dialog = new ChoiceDialog<>(predefinedSets.getFirst(), predefinedSets);
     dialog.setTitle("Predefined Affine Transformations");
     dialog.setHeaderText("Select a predefined affine transformation:");
     dialog.setContentText("Available transformations:");
@@ -234,7 +238,7 @@ public class AffineTransformView extends FractalView {
    * Loads the transformations from the given description into the UI.
    *
    * @param description the chaos game description.
-    * @since 0.0.1
+   * @since 0.0.1
    */
   private void loadTransformationsToUI(ChaosGameDescription description) {
     if (description == null) {
@@ -267,6 +271,7 @@ public class AffineTransformView extends FractalView {
   protected void updateFractal() {
     try {
       int steps = Integer.parseInt(stepsField.getText());
+      List<Double> currentWeights = controller.getGame().getWeights(); // the current weights
 
       Vector2D minCoords = new Vector2D(parseTextFieldToDouble(minXField),
           parseTextFieldToDouble(minYField)
@@ -280,6 +285,7 @@ public class AffineTransformView extends FractalView {
       List<Transform2D> currentTransformations = controller.getCurrentGameDescription().getTransformations();
       controller.updateAffineTransformationGame(steps, minCoords, maxCoords, currentTransformations);
       controller.initializeGame(controller.getCurrentGameDescription(), (int) canvas.getWidth(), (int) canvas.getHeight(), steps);
+      controller.updateGameWithWeights(controller.getCurrentGameDescription(), steps, currentWeights);
 
       drawFractal(canvas);
     } catch (NumberFormatException e) {
@@ -367,7 +373,7 @@ public class AffineTransformView extends FractalView {
 
   /**
    * Sets up bindings for transformation fields to update the model on change.
-   * Currently a placeholder for future implementation.
+   * Currently, a placeholder for future implementation.
    *
    * @since 0.0.5
    */
