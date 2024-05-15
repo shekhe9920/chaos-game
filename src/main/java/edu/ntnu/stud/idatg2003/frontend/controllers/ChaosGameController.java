@@ -19,14 +19,13 @@ import java.util.stream.Collectors;
  * The {@code ChaosGameController} class manages the Chaos Game simulation.
  * It initializes the game, updates its state, and handles observers that monitor changes.
  *
- * @version 0.0.4
+ * @version 0.0.5
  * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGameController {
 
-
   private ChaosGame chaosGame;  // The Chaos Game instance
-  private List<ChaosGameObserver> observers = new ArrayList<>(); // List of observers
+  private final List<ChaosGameObserver> observers = new ArrayList<>(); // List of observers
 
 
 
@@ -39,17 +38,26 @@ public class ChaosGameController {
    * @param canvasHeight The height of the canvas in pixels.
    * @since 0.0.1
    */
-  public void initializeGame(ChaosGameDescription description, int canvasWidth,
-      int canvasHeight, int steps) {
-
+  public void initializeGame(ChaosGameDescription description, int canvasWidth, int canvasHeight, int steps) {
     try {
       chaosGame = new ChaosGame(description, canvasWidth, canvasHeight);
+      if (chaosGame.getWeights() == null || chaosGame.getWeights().isEmpty()) {
+
+        System.out.println("The list of weights is either null or empty, setting default weights");
+        // setting default weights for transformations only if they are not set:
+        setTransformWeights(getDefaultWeights(description));
+
+      } else {
+
+        setTransformWeights(chaosGame.getWeights());
+
+      }
+
       chaosGame.runSteps(steps); // initial steps
 
     } catch (Exception e) {
       e.printStackTrace();
     }
-
   }
 
 
@@ -98,7 +106,6 @@ public class ChaosGameController {
 
 
 
-
   /**
    * Retrieves the current Chaos Game instance.
    *
@@ -108,8 +115,6 @@ public class ChaosGameController {
   public ChaosGame getGame() {
     return chaosGame;
   }
-
-
 
 
 
@@ -188,7 +193,9 @@ public class ChaosGameController {
    */
   private void updateChaosGame(ChaosGameDescription description, int steps) {
     if (chaosGame != null) {
+      List<Double> currentWeights = chaosGame.getWeights();
       chaosGame.setDescription(description);
+      chaosGame.setTransformWeights(currentWeights);
       chaosGame.getCanvas().clearCanvas();
       chaosGame.runSteps(steps);
       System.out.println("updateChaosGame called with steps: (ChaosGameController: updateChaosGame)" + steps);
@@ -196,6 +203,7 @@ public class ChaosGameController {
       notifyObserversAboutDescriptionChange(description);
     }
   }
+
 
 
 
@@ -232,7 +240,7 @@ public class ChaosGameController {
       int defaultSteps = 10000; // Standard value for total steps
 
       if (description.getTransformations().stream().anyMatch(JuliaTransform.class::isInstance)) {
-        JuliaTransform juliaTransform = (JuliaTransform) description.getTransformations().get(0);
+        JuliaTransform juliaTransform = (JuliaTransform) description.getTransformations().getFirst();
         Complex c = juliaTransform.getPoint();
         updateJuliaSetGame(defaultSteps, description.getMinCoords(), description.getMaxCoords(), c);
       } else {
@@ -284,4 +292,65 @@ public class ChaosGameController {
     }
     return List.of(); // Returns an empty list if no description or transformations are found
   }
+
+
+
+
+  /**
+   * Sets the weights for the transformations in the Chaos Game.
+   *
+   * @param weights the list of weights for the transformations
+   * @since 0.0.5
+   */
+  public void setTransformWeights(List<Double> weights) {
+    System.out.println("Setting weights in ChaosGameController" + weights);
+    if (chaosGame != null) {
+      System.out.println("Setting weights in ChaosGameController" + weights);
+      chaosGame.setTransformWeights(weights);
+      System.out.println("Weights set in ChaosGameController" + weights);
+    } else {
+      throw new IllegalStateException("Chaos game has not been initialized yet.");
+    }
+  }
+
+
+
+  /**
+   * Retrieves the default weights for the transformations.
+   *
+   * @param description The description of the Chaos Game.
+   * @return The list of default weights.
+   * @since 0.0.5
+   */
+  public List<Double> getDefaultWeights(ChaosGameDescription description) {
+    int size = description.getTransformations().size();
+    List<Double> weights = new ArrayList<>();
+    for (int i = 0; i < size; i++) {
+      weights.add(1.0 / size); // setting equal weights for all transformations
+    }
+    return weights;
+  }
+
+
+
+
+  /**
+   * Updates the Chaos Game with new weights and runs the specified number of steps.
+   *
+   * @param newDescription The new description of the Chaos Game.
+   * @param steps The number of steps to run.
+   * @param weights The list of weights for the transformations.
+   * @since 0.0.5
+   */
+  public void updateGameWithWeights(ChaosGameDescription newDescription, int steps, List<Double> weights) {
+    if (chaosGame != null) {
+      chaosGame.setDescription(newDescription);
+      chaosGame.setTransformWeights(weights); // setting new weights
+      chaosGame.getCanvas().clearCanvas();
+      chaosGame.runSteps(steps);
+      notifyObserversAboutUpdate();
+      notifyObserversAboutDescriptionChange(newDescription);
+    }
+  }
+
 }
