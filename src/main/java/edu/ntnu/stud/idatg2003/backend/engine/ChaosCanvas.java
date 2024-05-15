@@ -13,8 +13,8 @@ import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
  * The canvas supports transformations from fractal coordinates to canvas pixel indices,
  * allowing fractal points to be accurately plotted on the canvas.
  *
- * @version 0.0.3
- * @since 0.0.1 (The version of ChaosGameEngine application when introduced)
+ * @version 0.0.4
+ * @since 0.0.1 (The version of Chaos-Game application when introduced)
  */
 public class ChaosCanvas {
 
@@ -23,9 +23,11 @@ public class ChaosCanvas {
   private final int height;         // Height of the canvas in pixels
   private final Vector2D minCoords; // lower left corner coordinates of the fractal space
   private final Vector2D maxCoords; // upper right corner coordinates of the fractal space
+  private final int[][] hitCounts;  // Array to store the number of times a pixel is hit
 
   // Transformation from fractal coordinates to canvas pixel indices:
   private AffineTransform2D transformCoordsToIndices;
+
 
 
 
@@ -47,6 +49,7 @@ public class ChaosCanvas {
     this.height = height;
     this.minCoords = minCoords;
     this.maxCoords = maxCoords;
+    this.hitCounts = new int[height][width];
     this.canvas = new int[height][width];
     initializeTransformation();
     clearCanvas();
@@ -76,9 +79,14 @@ public class ChaosCanvas {
     Vector2D translationVector =
         new Vector2D(-minCoords.getX0() * scaleX, -minCoords.getX1() * scaleY);
 
+    System.out.println("ScaleX: " + scaleX + ", ScaleY: " + scaleY);
+    System.out.println("Translation Vector: " + translationVector.getX0() + ", " + translationVector.getX1());
+
+
     // Creating the AffineTransform2D with the matrix and vector:
     this.transformCoordsToIndices = new AffineTransform2D(scaleMatrix, translationVector);
   }
+
 
 
 
@@ -93,13 +101,11 @@ public class ChaosCanvas {
    * @since 0.0.3
    */
   private Vector2D transformToCanvasIndices(Vector2D point) {
-    Vector2D canvasPoint = transformCoordsToIndices.transform(point);
-    int xIndex = (int) canvasPoint.getX0();
-    int yIndex = (int) canvasPoint.getX1();
-    if (xIndex < 0 || xIndex >= width || yIndex < 0 || yIndex >= height) {
-      throw new IndexOutOfBoundsException("Point transformed to canvas coordinates is out of bounds.");
-    }
-    return canvasPoint;
+    Vector2D canvasPoint = transformCoordsToIndices.transform(point); // Transforming the point
+    // Clamping to canvas bounds:
+    int xIndex = (int) Math.min(Math.max(0, canvasPoint.getX0()), width - 1);
+    int yIndex = (int) Math.min(Math.max(0, canvasPoint.getX1()), height - 1);
+    return new Vector2D(xIndex, yIndex); // Returning the transformed point
   }
 
 
@@ -132,8 +138,28 @@ public class ChaosCanvas {
    * @since 0.0.1
    */
   public void putPixel(Vector2D point, int color) {
-    Vector2D canvasPoint = transformToCanvasIndices(point);
-    canvas[(int) canvasPoint.getX1()][(int) canvasPoint.getX0()] = color;
+    Vector2D canvasPoint = transformToCanvasIndices(point);  // Transforming to canvas indices
+    int xIndex = (int) canvasPoint.getX0();  // Getting the x index
+    int yIndex = (int) canvasPoint.getX1();  // Getting the y index
+    if (xIndex >= 0 && xIndex < width && yIndex >= 0 && yIndex < height) {
+      canvas[yIndex][xIndex] = color;  // Setting the color at the transformed location
+      hitCounts[yIndex][xIndex]++;     // Incrementing the hit count for the pixel
+    }
+  }
+
+
+
+
+
+
+  /**
+   * Retrieves the hit counts array, which tracks how many times each pixel has been drawn.
+   *
+   * @return The 2D array representing the hit counts for each pixel.
+   * @since 0.0.3
+   */
+  public int[][] getHitCounts() {
+    return hitCounts;
   }
 
 
@@ -157,6 +183,7 @@ public class ChaosCanvas {
 
   /**
    * Clears the canvas by setting all pixels to 0, indicating that no pixels are drawn.
+   * This also resets the hit counts for each pixel.
    *
    * @since 0.0.1
    */
@@ -164,6 +191,7 @@ public class ChaosCanvas {
     for (int i = 0; i < height; i++) { // 1. loop is for rows (height)
       for (int j = 0; j < width; j++) { // 2. loop is for columns (width)
         canvas[i][j] = 0;
+        hitCounts[i][j] = 0; // Resetting the hit counts
       }
     }
   }

@@ -13,7 +13,7 @@ import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
  * callbacks when the game state is updated or when the game's description changes.
  *
  * @version 0.0.0
- * @since 0.0.2
+ * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public interface ChaosGameObserver {
 

@@ -6,13 +6,12 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 /**
  * The {@code JuliaTransform} class represents a complex transformation of the form
  * z -> ±sqrt(z - c), where z is a complex number, and c is a complex constant.
+ * This transformation is used in generating Julia sets, a type of fractal.
  *
  * @version 0.0.2
- * @since 0.0.0 (The version of ChaosGameEngine application when introduced)
+ * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
 public class JuliaTransform implements Transform2D {
-
-
 
   private Complex point; // Represents the complex constant 'c'
   private int sign;      // Represents the sign of the transformation, which must be either 1 or -1
@@ -36,6 +35,7 @@ public class JuliaTransform implements Transform2D {
 
 
 
+
   /**
    * Sets the point of the transformation vector.
    *
@@ -54,10 +54,11 @@ public class JuliaTransform implements Transform2D {
 
 
 
+
   /**
    * Sets the sign of the transformation vector.
    *
-   * @param sign sign The sign to set, which must be either 1 or -1.
+   * @param sign The sign to set, which must be either 1 or -1.
    * @throws IllegalArgumentException If the sign is not 1 or -1.
    * @since 0.0.0
    */
@@ -86,10 +87,38 @@ public class JuliaTransform implements Transform2D {
 
 
   /**
+   * Gets the point of the Julia transformation vector.
+   *
+   * @return The point.
+   * @since 0.0.2
+   */
+  public Complex getPoint() {
+    return point;
+  }
+
+
+
+
+
+  /**
    * Transforms a given complex number {@code z} according to the transformation z -> ±sqrt(z - c).
+   *
+   * <p>
    * This method calculates the square root of the difference between the input complex number and
    * the complex constant 'c'. The sign of the square root is determined by the {@code sign} field
    * of this {@code JuliaTransform} object.
+   *
+   * The transformation is given by:
+   * <pre>
+   * z' = ±sqrt(z - c)
+   * </pre>
+   * where:
+   * <ul>
+   * <li>z is the input complex number</li>
+   * <li>c is the complex constant</li>
+   * <li>± indicates that the sign can be either positive or negative</li>
+   * </ul>
+   * </p>
    *
    * @param z The complex number to transform.
    * @return The transformed complex number.
@@ -102,8 +131,8 @@ public class JuliaTransform implements Transform2D {
 
     Complex newComplex = zMinusC.sqrt();  // Calculating the square root of z - c
 
-    double newReal = newComplex.getX0();  // the real part of the square root
-    double newImaginary = newComplex.getX1();  // the imaginary part of the square root
+    double newReal = newComplex.getX0();  // The real part of the square root
+    double newImaginary = newComplex.getX1();  // The imaginary part of the square root
 
     // Checking if both newReal and newImaginary are zero:
     if (newReal == 0 && newImaginary == 0) {
@@ -115,5 +144,4 @@ public class JuliaTransform implements Transform2D {
     // Return: The transformed vector
     return new Vector2D(sign * newReal, sign * newImaginary);
   }
-
 }

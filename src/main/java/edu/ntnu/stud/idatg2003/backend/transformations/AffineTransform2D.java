@@ -8,8 +8,16 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
  * x -> Ax + b, where A is a 2x2 matrix, and b is a 2-dimensional vector.
  * It implements the {@code Transform2D} interface.
  *
+ * <p>
+ * An affine transformation can be represented as:
+ * <pre>
+ * x' = Ax + b
+ * </pre>
+ * where x is the original vector, x' is the transformed vector, A is a 2x2 matrix representing linear transformation, and b is a 2D vector representing translation.
+ * </p>
+ *
  * @version 0.0.2
- * @since 0.0.0 (The version of ChaosGameEngine application when introduced)
+ * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
 public class AffineTransform2D implements Transform2D {
 

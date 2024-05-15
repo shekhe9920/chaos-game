@@ -1,150 +1,77 @@
 package edu.ntnu.stud.idatg2003;
 
-
-import edu.ntnu.stud.idatg2003.backend.engine.ChaosGame;
-import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
-import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescriptionFactory;
-import edu.ntnu.stud.idatg2003.backend.mathoperations.Complex;
-import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
-import edu.ntnu.stud.idatg2003.frontend.controllers.ChaosGameGUIController;
-import java.util.ArrayList;
+import edu.ntnu.stud.idatg2003.frontend.controllers.MainViewController;
+import java.util.Optional;
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.layout.VBox;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
+/**
+ * Main class for launching the Chaos Game GUI application.
+ * This class extends JavaFX's Application class and sets up the primary stage and event handlers.
+ *
+ * @version 0.0.5
+ * @since 0.0.2 (The version of Chaos-Game application when introduced)
+ */
 public class ChaosGameGUI extends Application {
 
 
 
-  private Canvas canvas;
-  private ChaosGame chaosGame;
-  private GraphicsContext gc;
+  /**
+   * Handles the exit attempt when the user tries to close the application.
+   * Displays a confirmation dialog to prevent accidental closure.
+   *
+   * @param event the WindowEvent triggered when attempting to close the window
+   * @since 0.0.3
+   */
+  private void handleExitAttempt(WindowEvent event) {
+    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    alert.setTitle("Confirm Exit");
+    alert.setHeaderText("Are you sure you want to close ChaosGame?");
+    alert.setContentText("Any unsaved changes will be lost.");
+
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.isPresent() && result.get() != ButtonType.OK) {
+      event.consume(); // Prevent the window from closing if the user cancels
+    } else {
+      Platform.exit(); // Closes the application if the user confirms
+    }
+  }
 
 
 
 
+  /**
+   * The main entry point for the JavaFX application.
+   * Initializes the primary stage and sets up the main view controller.
+   *
+   * @param primaryStage the primary stage for this application
+   * @since 0.0.1
+   */
   @Override
   public void start(Stage primaryStage) {
-    VBox root = new VBox();
-    MenuBar menuBar = createMenuBar();
-    root.getChildren().add(menuBar);
+    // Initiate MainViewController and set up the primary stage
+    MainViewController mainViewController = MainViewController.getInstance(); // Singleton instance
+    mainViewController.init(primaryStage);
 
-    canvas = new Canvas(600, 600);
-    gc = canvas.getGraphicsContext2D();
-    chaosGame =
-        new ChaosGame(
-            new ChaosGameDescription(
-                new Vector2D(0, 0), new Vector2D(1, 1), new ArrayList<>()), 600, 600);
-
-    ComboBox<String> fractalChoiceBox = new ComboBox<>();
-    fractalChoiceBox.getItems().addAll("Sierpinski Triangle", "Barnsley Fern", "Julia Set");
-    fractalChoiceBox.getSelectionModel().selectFirst(); // Automatically select the first item
-
-    root.getChildren().addAll(fractalChoiceBox, canvas);
-
-    ChaosGameGUIController guiController = new ChaosGameGUIController(canvas);
-
-    fractalChoiceBox.setOnAction(event -> {
-      String choice = fractalChoiceBox.getValue();
-      switch (choice) {
-        case "Sierpinski Triangle":
-          chaosGame.setDescription(ChaosGameDescriptionFactory.createSierpinskiTriangle());
-          break;
-        case "Barnsley Fern":
-          chaosGame.setDescription(ChaosGameDescriptionFactory.createBarnsleyFern());
-          break;
-        case "Julia Set":
-          Complex c = new Complex(-0.74543, 0.11301); // c constant
-          chaosGame.setDescription(ChaosGameDescriptionFactory.createJuliaSetDescription(c));
-          break;
-      }
-    });
-
-    Button startButton = new Button("Start");
-    startButton.setOnAction(event -> generateAndDrawFractal());
-    root.getChildren().add(startButton);
-
-    Scene scene = new Scene(root, 1100, 700);
-    primaryStage.setTitle("Chaos Game");
-    primaryStage.setScene(scene);
-    primaryStage.show();
+    // Set the on-close request handler to confirm exit attempts
+    primaryStage.setOnCloseRequest(this::handleExitAttempt);
+    primaryStage.show(); // Show the primary stage
   }
 
 
 
 
-  private void generateAndDrawFractal() {
-    if (chaosGame == null || chaosGame.getCanvas() == null) {
-      System.out.println("Chaos game or canvas is null");
-      return;
-    }
-    ChaosGameDescription chaos = chaosGame.getDescription();
-    chaosGame = new ChaosGame(chaos, 600, 600);
-    chaosGame.runSteps(100000); // step count
-    drawFractal();
-  }
-
-
-
-
-  private void drawFractal() {
-    // Checking if gc is null:
-    if (gc == null) {
-      gc = canvas.getGraphicsContext2D();
-    }
-
-    // Clearing the canvas before drawing the new fractal:
-    gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-    // Drawing the fractal:
-    int[][] pixelArray = chaosGame.getCanvas().getCanvasArray();
-    for (int i = 0; i < pixelArray.length; i++) {
-      for (int j = 0; j < pixelArray[i].length; j++) {
-        if (pixelArray[i][j] == 1) {
-          gc.fillRect(j, canvas.getHeight() - i, 1, 1); // Draw each point, flipping the y-coordinate
-        }
-      }
-    }
-  }
-
-
-
-
-  private MenuBar createMenuBar() {
-    MenuBar menuBar = new MenuBar();
-    Menu menuFile = new Menu("File");
-    MenuItem newFractal = new MenuItem("New...");
-    MenuItem openFile = new MenuItem("Open...");
-    MenuItem saveFile = new MenuItem("Save As...");
-    menuFile.getItems().addAll(newFractal, openFile, saveFile);
-    menuBar.getMenus().add(menuFile);
-
-    // TODO: DEFINE MENU ITEM ACTIONS:
-    newFractal.setOnAction(event -> {
-      // Handle creating a new fractal...
-    });
-    openFile.setOnAction(event -> {
-      // Handle opening a fractal description from a file...
-    });
-    saveFile.setOnAction(event -> {
-      // Handle saving the current fractal description to a file...
-    });
-
-    return menuBar;
-  }
-
-
-
-
+  /**
+   * The main method to launch the JavaFX application.
+   *
+   * @param args the command line arguments
+   * @since 0.0.1
+   */
   public static void main(String[] args) {
-    launch(args);
+    launch(args); // Launch the JavaFX application
   }
 }

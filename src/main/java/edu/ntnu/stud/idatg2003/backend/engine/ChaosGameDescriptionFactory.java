@@ -6,7 +6,9 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
 import edu.ntnu.stud.idatg2003.backend.transformations.JuliaTransform;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A factory class for creating predefined {@code ChaosGameDescription} instances.
@@ -15,11 +17,17 @@ import java.util.Arrays;
  * a description for Julia sets given a specific complex number.
  *
  * @version 0.0.0
- * @since 0.0.3 (The version of ChaosGameEngine application when introduced)
+ * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGameDescriptionFactory {
 
 
+  /**
+   * Private constructor to prevent instantiation of this class.
+   */
+  ChaosGameDescriptionFactory() {
+    // Private constructor to prevent instantiation
+  }
 
 
   /**
@@ -31,9 +39,10 @@ public class ChaosGameDescriptionFactory {
    * @since 0.0.0
    */
   public static ChaosGameDescription createSierpinskiTriangle() {
-    Vector2D minCoords = new Vector2D(0, 0);
-    Vector2D maxCoords = new Vector2D(1, 1);
+    Vector2D minCoords = new Vector2D(0, 0); // Lower left corner
+    Vector2D maxCoords = new Vector2D(1, 1); // Upper right corner
 
+    // Define the three affine transformations for the Sierpinski Triangle:
     Transform2D transform1 =
         new AffineTransform2D(new Matrix2x2(0.5, 0, 0, 0.5),
             new Vector2D(0, 0)
@@ -49,6 +58,7 @@ public class ChaosGameDescriptionFactory {
             new Vector2D(0.5, 0)
         );
 
+    // Return a new ChaosGameDescription with the transformations and bounds
     return new ChaosGameDescription(
         minCoords, maxCoords, Arrays.asList(transform1, transform2, transform3)
     );
@@ -67,9 +77,10 @@ public class ChaosGameDescriptionFactory {
    * @since 0.0.0
    */
   public static ChaosGameDescription createBarnsleyFern() {
-    Vector2D minCoords = new Vector2D(-2.65, 0);
-    Vector2D maxCoords = new Vector2D(2.65, 10 );
+    Vector2D minCoords = new Vector2D(-2.65, 0);   // Lower left corner
+    Vector2D maxCoords = new Vector2D(2.65, 10 );  // Upper right corner
 
+    // Define the four affine transformations for the Barnsley Fern:
     Transform2D transform1 =
         new AffineTransform2D(
             new Matrix2x2(0, 0, 0, .16),
@@ -94,11 +105,13 @@ public class ChaosGameDescriptionFactory {
             new Vector2D(0, .44)
         );
 
+    // Return a new ChaosGameDescription with the transformations and bounds
     return new ChaosGameDescription(
             minCoords, maxCoords, Arrays.asList(transform1, transform2, transform3, transform4)
     );
 
   }
+
 
 
 
@@ -116,12 +129,14 @@ public class ChaosGameDescriptionFactory {
    * @since 0.0.0
    */
   public static ChaosGameDescription createJuliaSetDescription(Complex c) {
-    Vector2D minCoords = new Vector2D(-1.6, -1);
-    Vector2D maxCoords = new Vector2D(1.6, 1);
+    Vector2D minCoords = new Vector2D(-1.6, -1);  // Lower left corner
+    Vector2D maxCoords = new Vector2D(1.6, 1);    // Upper right corner
 
+    // Define the two Julia set transformations based on the given complex number
     Transform2D juliaTransform = new JuliaTransform(c, 1);
     Transform2D juliaTransform2 = new JuliaTransform(c, -1);
 
+    // Return a new ChaosGameDescription with the transformations and bounds
     return new ChaosGameDescription(
         minCoords, maxCoords, Arrays.asList(juliaTransform, juliaTransform2)
     );

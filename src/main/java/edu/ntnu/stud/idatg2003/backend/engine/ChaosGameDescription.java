@@ -2,6 +2,7 @@ package edu.ntnu.stud.idatg2003.backend.engine;
 
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -17,14 +18,14 @@ import java.util.List;
  * limited to the Sierpinski triangle,
  * by applying the specified transformations to points within the area.
  *
- * @version 0.0.3
- * @since 0.0.1 (The version of ChaosGameEngine application when introduced)
+ * @version 0.0.4
+ * @since 0.0.1 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGameDescription {
 
-  private final Vector2D minCoords;    // Coordinates of the lower left corner of the drawing area.
-  private final Vector2D maxCoords;    // Coordinates of the upper right corner of the drawing area.
-  private final List<Transform2D> transformations; // List of transformations (affine or Julia).
+  private Vector2D minCoords;  // Coordinates of the lower left corner of the drawing area.
+  private Vector2D maxCoords;  // Coordinates of the upper right corner of the drawing area.
+  private List<Transform2D> transformations; // List of transformations (Affine or Julia).
 
 
 
@@ -44,11 +45,60 @@ public class ChaosGameDescription {
    * @since 0.0.1
    */
   public ChaosGameDescription(Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
-    this.transformations = transformations;
-    this.minCoords = minCoords;
-    this.maxCoords = maxCoords;
+    this.transformations = new ArrayList<>(transformations); // Initializing a transformation list
+    setMinCoords(minCoords); // Setting minimum coordinates
+    setMaxCoords(maxCoords); // Setting maximum coordinates
   }
 
+
+
+
+  /**
+   * Sets the list of transformations for generating the fractal.
+   *
+   * @param transformations A list of transformation rules to apply in the chaos game.
+   * @since 0.0.4
+   */
+  public void setTransformations(List<Transform2D> transformations) {
+    if (transformations != null) {
+      this.transformations.clear();  // Clearing the existing transformations
+      this.transformations.addAll(transformations);  // Adding the new transformations
+    } else {
+      throw new IllegalArgumentException("Transformations cannot be null");
+    }
+  }
+
+
+
+  /**
+   * Sets the coordinates marking the lower left boundary of the fractal's drawing area.
+   *
+   * @param minCoords A Vector2D instance representing the lower left corner coordinates.
+   * @since 0.0.4
+   */
+  public void setMinCoords(Vector2D minCoords) {
+    if (minCoords != null) {
+      this.minCoords = minCoords;
+    } else {
+      throw new IllegalArgumentException("MinCoords cannot be null");
+    }
+  }
+
+
+
+  /**
+   * Sets the coordinates marking the upper right boundary of the fractal's drawing area.
+   *
+   * @param maxCoords A Vector2D instance representing the upper right corner coordinates.
+   * @since 0.0.4
+   */
+  public void setMaxCoords(Vector2D maxCoords) {
+    if (maxCoords != null) {
+      this.maxCoords = maxCoords;
+    } else {
+      throw new IllegalArgumentException("MaxCoords cannot be null");
+    }
+  }
 
 
 
@@ -89,13 +139,5 @@ public class ChaosGameDescription {
     return transformations;
   }
 
-
-
-
-/*
- // Change: use iterator instead of returning the entire list
-  public Iterator<Transform2D> getTransformations() {
-    return transformations.iterator();
-  }*/
 
 }

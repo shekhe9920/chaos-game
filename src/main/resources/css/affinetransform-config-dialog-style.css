@@ -1,0 +1,25 @@
+/* Stylesheet for the AffineTransformConfigDialog class */
+.text-field-small {
+  -fx-pref-width: 50px;  /* The width of the Text-field */
+}
+
+/* Style for matrix- and vector-grouping */
+.matrix-grid, .vector-grid {
+  -fx-padding: 5px;
+  -fx-border-color: black;
+  -fx-border-width: 2px;
+  -fx-background-color: white;
+  -fx-border-radius: 5px;
+}
+
+/* Style for titles */
+.matrix-label, .vector-label {
+  -fx-font-weight: bold;
+  -fx-font-size: 12px;
+}
+
+/* Style for 'Remove' button */
+.button-remove {
+  -fx-background-color: #64666a;
+  -fx-text-fill: white;
+}
