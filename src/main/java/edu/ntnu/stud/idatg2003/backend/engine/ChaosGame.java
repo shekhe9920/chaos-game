@@ -15,17 +15,20 @@ import java.util.Random;
  * Observers can be attached to monitor changes in the game's state,
  * such as updates to the game description.
  *
- * @version 0.0.3
- * @since 0.0.1 (The version of ChaosGameEngine application when introduced)
+ * @version 0.0.4
+ * @since 0.0.1 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGame {
 
-  private final List<ChaosGameObserver> observers = new ArrayList<>();
-  private ChaosGameDescription description;
-  private final ChaosCanvas canvas;
-  private Vector2D currentPoint;
-  private final Random random;
 
+  // List of observers monitoring the game's state:
+  private final List<ChaosGameObserver> observers = new ArrayList<>();
+
+  private ChaosGameDescription description; // Description of the chaos game
+  private final ChaosCanvas canvas; // Canvas for drawing the fractal
+  private Vector2D currentPoint; // Current point in the fractal space
+  private final Random random; // Random number generator for selecting transformations
+  private int lastRunSteps = 0; // Number of steps in the last run of the game
 
 
 
@@ -54,6 +57,23 @@ public class ChaosGame {
 
 
   /**
+   * Sets the starting point for the chaos game.
+   * This point is where the first iteration of transformations will begin.
+   *
+   * @param startPoint A {@code Vector2D} representing the initial point in fractal space.
+   * @since 0.0.4
+   */
+  public void setStartingPoint(Vector2D startPoint) {
+    if (startPoint == null) {
+      throw new IllegalArgumentException("Starting point cannot be null");
+    }
+    this.currentPoint = startPoint;
+  }
+
+
+
+
+  /**
    * Executes the chaos game for a specified number of steps.
    * At each step, a transformation is randomly selected and applied to the current point,
    * and the result is drawn on the canvas.
@@ -63,19 +83,38 @@ public class ChaosGame {
    * @since 0.0.1
    */
   public void runSteps(int steps) {
+    lastRunSteps = steps; // Storing the number of steps for later retrieval
 
     for (int i = 0; i < steps; i++) {
       // Randomly selecting a transformation from the list:
       Transform2D transformation =
           description.getTransformations()
-              .get(random.nextInt(description.getTransformations().size()));
+          .get(random.nextInt(description.getTransformations().size()));
 
       // Applying the transformation to the current point:
       currentPoint = transformation.transform(currentPoint);
       canvas.putPixel(currentPoint, 1); // '1' is the color value for a plotted point
     }
-
+    notifyObserversGameUpdated(); // Notifying observers only once after all steps
   }
+
+
+
+
+
+
+
+
+  /**
+   * Retrieves the number of steps in the last run of the chaos game.
+   *
+   * @return The number of steps in the last run.
+   * @since 0.0.4
+   */
+  public int getSteps() {
+    return lastRunSteps;
+  }
+
 
 
 
@@ -206,6 +245,20 @@ public class ChaosGame {
   public void updateDescription(ChaosGameDescription newDescription) {
     this.description = newDescription;
     notifyDescriptionChanged(newDescription);
+  }
+
+
+
+  /**
+   * Notifies all registered observers that the chaos game has been updated.
+   * This method is called after each iteration or significant update to the game state.
+   *
+   * @since 0.0.4
+   */
+  private void notifyObserversGameUpdated() {
+    for (ChaosGameObserver observer : observers) {
+      observer.onChaosGameUpdated();
+    }
   }
 
 

@@ -54,7 +54,7 @@ class ChaosGameFileHandlerTest {
     ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transforms);
 
     // Writing the description to the file:
-    ChaosGameFileHandler.writeToFile(description, file.toString());
+    ChaosGameFileHandler.writeToFile(description, file.toString(), "Affine2D");
 
     // Verifying the file was written correctly:
     Assertions.assertTrue(Files.exists(file));

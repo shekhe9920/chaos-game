@@ -3,8 +3,16 @@ package edu.ntnu.stud.idatg2003.backend.mathoperations;
 /**
  * {@code Matrix2x2} is a class representing a 2x2 matrix.
  *
+ * <p>
+ * A 2x2 matrix is represented as:
+ * <pre>
+ * | a00 a01 |
+ * | a10 a11 |
+ * </pre>
+ * </p>
+ *
  * @version 0.0.2
- * @since 0.0.0 (The version of ChaosGameEngine application when introduced)
+ * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
 public class Matrix2x2 {
 
@@ -63,6 +71,14 @@ public class Matrix2x2 {
   /**
    * Multiplies this matrix by a given {@code Vector2D}.
    *
+   * <p>
+   * The multiplication of a 2x2 matrix with a vector [x, y]^T (T = transposed) is given by:
+   * <pre>
+   * | a00 a01 |   | x |   | a00*x + a01*y |
+   * | a10 a11 | * | y | = | a10*x + a11*y |
+   * </pre>
+   * </p>
+   *
    * @param vector The vector to multiply.
    * @return The resulting {@code Vector2D}.
    * @since 0.0.0
@@ -112,21 +128,49 @@ public class Matrix2x2 {
 
 
 
+
+
   // Getter methods for the matrix elements:
+
+  /**
+   * Gets the element at row 0, column 0.
+   *
+   * @return The value at row 0, column 0.
+   * @since 0.0.0
+   */
   public double getA00() {
     return a00;
   }
 
+  /**
+   * Gets the element at row 0, column 1.
+   *
+   * @return The value at row 0, column 1.
+   * @since 0.0.0
+   */
   public double getA01() {
     return a01;
   }
 
+  /**
+   * Gets the element at row 1, column 0.
+   *
+   * @return The value at row 1, column 0.
+   * @since 0.0.0
+   */
   public double getA10() {
     return a10;
   }
 
+  /**
+   * Gets the element at row 1, column 1.
+   *
+   * @return The value at row 1, column 1.
+   * @since 0.0.0
+   */
   public double getA11() {
     return a11;
   }
+
 }
 

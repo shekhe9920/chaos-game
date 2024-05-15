@@ -74,6 +74,8 @@ public class ChaosGameCLI {
           break;
 
         case WRITE_FRACTAL_DESCRIPTION_TO_FILE:
+          // TODO: Implement this feature:
+          /*
           if (game == null) {
             System.out.println("No game loaded. Read a description first.");
             break;
@@ -86,7 +88,7 @@ public class ChaosGameCLI {
           } catch (IOException e) {
             System.out.println("Error writing file: " + e.getMessage());
           }
-          break;
+          break;*/
 
         case RUN_ITERATIONS:
           if (game == null) {

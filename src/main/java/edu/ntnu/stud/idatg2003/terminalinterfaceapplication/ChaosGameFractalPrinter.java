@@ -10,7 +10,6 @@ import edu.ntnu.stud.idatg2003.backend.engine.ChaosGame;
  * for running a chaos game and printing the resulting fractal.
  *
  * @version 0.0.1
- * @since 0.0.1
  */
 public class ChaosGameFractalPrinter {
 
@@ -55,9 +54,10 @@ public class ChaosGameFractalPrinter {
    * @since 0.0.1
    */
   public static void main(String[] args) {
-    printFractalFromDescription(TEXT_FILE_PATH + "sierpinski.txt.txt");
-    printFractalFromDescription(TEXT_FILE_PATH + "julia.txt.txt");
+    printFractalFromDescription(TEXT_FILE_PATH + "sierpinski.txt");
+    printFractalFromDescription(TEXT_FILE_PATH + "julia.txt");
     printFractalFromDescription(TEXT_FILE_PATH + "barnsley-fern.txt");
+    //printFractalFromDescription(TEXT_FILE_PATH + "test-fractal.txt");
   }
 
 }

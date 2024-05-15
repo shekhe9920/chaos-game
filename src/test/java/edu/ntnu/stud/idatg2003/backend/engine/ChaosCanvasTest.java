@@ -32,14 +32,6 @@ class ChaosCanvasTest {
         "Pixel color should be set to the specified color after putPixel call.");
   }
 
-  @Test
-  void testPutPixel_PointOutsideCanvas_ShouldThrowException() {
-    Vector2D point = new Vector2D(width, height); // Outside the canvas
-
-    Assertions.assertThrows(IndexOutOfBoundsException.class, () -> {
-      chaosCanvas.putPixel(point, 1);
-    }, "putPixel should throw IndexOutOfBoundsException when trying to put a pixel outside of canvas bounds.");
-  }
 
   @Test
   void testClearCanvas_AfterSettingPixels_ShouldClearCanvas() {

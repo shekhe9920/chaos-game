@@ -9,7 +9,7 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
  * The transformation is defined by the implementing classes.
  *
  * @version 0.0.0
- * @since 0.0.0 (The version of ChaosGameEngine application when introduced)
+ * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
 public interface Transform2D {
 

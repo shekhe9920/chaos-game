@@ -29,11 +29,16 @@ import java.util.stream.Stream;
  * identifying the correct type based on the file content.
  *
  * @version 0.0.3
- * @since 0.0.1 (The version of ChaosGameEngine application when introduced)
+ * @since 0.0.1 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGameFileHandler {
 
 
+  /**
+   * Private constructor to prevent instantiation of this utility class.
+   */
+  ChaosGameFileHandler () {
+  }
 
 
   /**
@@ -143,6 +148,7 @@ public class ChaosGameFileHandler {
    * @throws IOException If an error occurs during file writing.
    * @since 0.0.1
    */
+  /*
   public static void writeToFile(ChaosGameDescription description, String path) throws IOException {
     try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path))) {
 
@@ -162,6 +168,46 @@ public class ChaosGameFileHandler {
               + vector.getX0() + "," + vector.getX1() + "\n");
         }
       }
+    } catch (IOException e) {
+      throw new IOException("An error occurred while writing to the file.", e);
+    }
+  }*/
+
+
+  public static void writeToFile
+  (ChaosGameDescription description, String path, String typeOfTransformation) throws IOException {
+
+    try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path))) {
+
+      writer.write(typeOfTransformation + "\n");
+
+      writer.write(description.getMinCoords().getX0() + ","
+          + description.getMinCoords().getX1() + "\n");
+      writer.write(description.getMaxCoords().getX0() + ","
+          + description.getMaxCoords().getX1() + "\n");
+
+      if ("Affine2D".equals(typeOfTransformation)) {
+        for (Transform2D transform : description.getTransformations()) {
+          if (transform instanceof AffineTransform2D affine) {
+            Matrix2x2 matrix = affine.getMatrix();
+            Vector2D vector = affine.getVector();
+            writer.write(matrix.getA00() + "," + matrix.getA01() + ","
+                + matrix.getA10() + "," + matrix.getA11() + ","
+                + vector.getX0() + "," + vector.getX1() + "\n");
+          }
+        }
+      } else if ("Julia".equals(typeOfTransformation)) {
+        for (Transform2D transform : description.getTransformations()) {
+          if (transform instanceof JuliaTransform julia) {
+            Complex constant = julia.getPoint();
+
+            writer.write(constant.getX0() + "," + constant.getX1() + "\n");
+          }
+        }
+      }
+    } catch (IOException e) {
+      throw new IOException("An error occurred while writing to the file.", e);
     }
   }
+
 }
