@@ -5,6 +5,7 @@ import static edu.ntnu.stud.idatg2003.frontend.utilityfrontend.FractalViewUtilit
 import edu.ntnu.stud.idatg2003.backend.ChaosGameObserver;
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
 import edu.ntnu.stud.idatg2003.frontend.controllers.ChaosGameController;
 import edu.ntnu.stud.idatg2003.frontend.controllers.MainViewController;
 import java.util.ArrayList;
@@ -13,13 +14,14 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 import java.util.Optional;
+
+
 
 /**
  * Abstract base class for all fractal views in the application.
@@ -30,18 +32,22 @@ import java.util.Optional;
  */
 public abstract class FractalView extends BorderPane implements ChaosGameObserver {
 
-  protected TitledPane settingsPane;
-  protected ChaosGameController controller;
-  protected Canvas canvas;
-  protected MenuBar menuBar;
+  protected TitledPane settingsPane;            // The settings pane
+  protected ChaosGameController controller;     // The controller for handling fractal logic
+  protected Canvas canvas;                      // The canvas for drawing the fractal
+  protected MenuBar menuBar;                    // The menu bar for the application
 
-  protected TextField minXField;
-  protected TextField minYField;
-  protected TextField maxXField;
-  protected TextField maxYField;
-  protected TextField stepsField;
+  protected TextField minXField;                // The text field for the minimum x coordinate
+  protected TextField minYField;                // The text field for the minimum y coordinate
+  protected TextField maxXField;                // The text field for the maximum x coordinate
+  protected TextField maxYField;                // The text field for the maximum y coordinate
+  protected TextField stepsField;               // The text field for the number of steps
 
-  protected static final int DEFAULT_STEPS = 100000;
+  protected static final int DEFAULT_STEPS = 100000;  // The default number of steps for the fractal
+
+
+
+
 
   /**
    * Constructor for FractalView.
@@ -52,13 +58,16 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @since 0.0.1
    */
   protected FractalView(ChaosGameController controller, int width, int height) {
-    this.controller = controller;
-    controller.addObserver(this);
-    this.canvas = new Canvas(width, height);
-    setupCanvas(width, height);
-    setupUI();
-    initializeCoordinateFields();
+    this.controller = controller;   // setting the controller
+    controller.addObserver(this);   // adding this view as an observer
+    this.canvas = new Canvas(width, height);    // setting the canvas
+    setupCanvas();  // setting up the canvas
+    initializeCoordinateFields();  // initializing the coordinate fields
+    setupUI();  // setting up the user interface
   }
+
+
+
 
   /**
    * Sets up the user interface including the menu bar and settings pane.
@@ -70,17 +79,70 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     setupSettingsPane();
   }
 
+
+
+
+
   /**
    * Sets up the canvas for drawing the fractal.
    *
-   * @param width  the width of the canvas
-   * @param height the height of the canvas
    * @since 0.0.1
    */
-  private void setupCanvas(int width, int height) {
+  protected void setupCanvas() {
     setCenter(canvas);
-    drawInitialFractal(width, height);
   }
+
+
+  /**
+   * Gets the canvas width.
+   *
+   * @return the width of the canvas
+   * @since 0.0.6
+   */
+  protected int getCanvasWidth() {
+    return (int) canvas.getWidth();
+  }
+
+
+  /**
+   * Gets the canvas height.
+   *
+   * @return the height of the canvas
+   * @since 0.0.6
+   */
+  protected int getCanvasHeight() {
+    return (int) canvas.getHeight();
+  }
+
+
+
+
+
+
+  /**
+   * Gets the canvas coordinates based on the given element.
+   *
+   * @param element the element to get the canvas coordinates. (minX, minY, maxX, maxY)
+   * @return the canvas coordinates for the element
+   * @since 0.0.6
+   */
+  protected double getCanvasCoords(String element) {
+    try {
+      return switch (element) {
+        case "minX" -> parseTextFieldToDouble(minXField);  // parsing the text field to double
+        case "minY" -> parseTextFieldToDouble(minYField);
+        case "maxX" -> parseTextFieldToDouble(maxXField);
+        case "maxY" -> parseTextFieldToDouble(maxYField);
+        default -> throw new IllegalArgumentException("Invalid canvas indices: " + element);
+      };
+    } catch (NumberFormatException e) {
+      System.err.println("Invalid canvas coordinate value: " + element);
+      return 0.0; // default value
+    }
+  }
+
+
+
 
   /**
    * Draws the initial fractal on the canvas.
@@ -90,6 +152,9 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @since 0.0.1
    */
   protected abstract void drawInitialFractal(int width, int height);
+
+
+
 
   /**
    * Sets up the menu bar with home, file, and settings menus.
@@ -104,10 +169,13 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     goBackHomeItem.setOnAction(e -> MainViewController.getInstance().switchToHomeView());
 
     // Initialize the switch fractal item with dynamic text
-    MenuItem switchFractalItem = new MenuItem(MainViewController.getInstance().getCurrentViewType());
+    MenuItem switchFractalItem =
+        new MenuItem(MainViewController.getInstance().getCurrentViewType());
+
     switchFractalItem.setOnAction(e -> {
       MainViewController.getInstance().openOtherFractalWindow();
-      switchFractalItem.setText(MainViewController.getInstance().getCurrentViewType());  // Update text after switch
+      switchFractalItem.setText(
+          MainViewController.getInstance().getCurrentViewType());  // Update text after switch
     });
 
     Menu fileMenu = new Menu("File");
@@ -133,53 +201,8 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @param canvas the canvas to draw on
    * @since 0.0.1
    */
-  protected void drawFractal(Canvas canvas) {
-    GraphicsContext gc = canvas.getGraphicsContext2D();
-    if (gc == null) {
-      throw new IllegalStateException("GraphicsContext not available");
-    }
+  protected abstract void drawFractal(Canvas canvas);
 
-    int[][] hitCounts = controller.getGame().getCanvas().getHitCounts();
-    int maxHits = getMaxHits(hitCounts);
-
-    // Fylle hele canvas med bakgrunnsfargen
-    Color backgroundColor = Color.WHITE; // The background color of the canvas
-    gc.setFill(backgroundColor);
-    gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-    // Tegner fraktalen basert på hitCounts
-    for (int i = 0; i < hitCounts.length; i++) {
-      for (int j = 0; j < hitCounts[i].length; j++) {
-        if (hitCounts[i][j] > 0) {
-          double intensity = (double) hitCounts[i][j] / maxHits;
-          gc.setFill(getColorForIntensity(intensity));
-          gc.fillRect(j, canvas.getHeight() - i, 1, 1);
-        }
-      }
-    }
-  }
-
-
-
-
-  /**
-   * Finds the maximum hit count in the hit count array.
-   *
-   * @param hitCounts the array of hit counts
-   * @return the maximum hit count
-   * @since 0.0.3
-   */
-  private int getMaxHits(int[][] hitCounts) {
-    int maxHits = 1;
-    for (int[] row : hitCounts) {
-      for (int hitCount : row) {
-        if (hitCount > maxHits) {
-          maxHits = hitCount;
-        }
-      }
-    }
-    return maxHits;
-  }
 
 
 
@@ -191,7 +214,7 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @return the color for the intensity
    * @since 0.0.6
    */
-  private Color getColorForIntensity(double intensity) {
+  protected Color getColorForIntensity(double intensity) {
     // Using HSV to RGB conversion for a smooth transition from blue to red
     return Color.hsb(240 * (1 - intensity), 1.0, 1.0);
   }
@@ -285,7 +308,7 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    *
    * @since 0.0.1
    */
-  private void initializeCoordinateFields() {
+  protected void initializeCoordinateFields() {
     minXField = new TextField("0.0");
     minYField = new TextField("0.0");
     maxXField = new TextField("1.0");
@@ -335,14 +358,16 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @since 0.0.3
    */
   protected void setupCoordinateFields(VBox settingsBox) {
-    settingsBox.setStyle("-fx-background-color: white; -fx-border-color: #ccc; -fx-border-width: 1;");
+    settingsBox
+        .setStyle("-fx-background-color: white; -fx-border-color: #ccc; -fx-border-width: 1;");
 
     Label coordinatesTitle = new Label("Fractal Canvas Coordinates");
     coordinatesTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10;");
 
     VBox coordinatesContainer = new VBox();
     coordinatesContainer.setSpacing(10);
-    coordinatesContainer.setStyle("-fx-padding: 10; -fx-border-color: #ccc; -fx-border-width: 1; -fx-background-color: #f8f8f8;");
+    coordinatesContainer
+        .setStyle("-fx-padding: 10; -fx-border-color: #ccc; -fx-border-width: 1; -fx-background-color: #f8f8f8;");
 
     minXField = new TextField("0.0");
     minYField = new TextField("0.0");
@@ -376,7 +401,7 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
   public void updateCanvasSize(int width, int height) {
     canvas.setWidth(width);
     canvas.setHeight(height);
-    setupCanvas(width, height);
+    setupCanvas();
     updateFractal();
   }
 
@@ -452,6 +477,12 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
    * @since 0.0.6
    */
   protected void showEditWeightsDialog() {
+    if (controller.getCurrentGameDescription().getTransformations().isEmpty() ||
+        !(controller.getCurrentGameDescription().getTransformations().getFirst() instanceof AffineTransform2D)) {
+      System.err.println("Weights are only applicable to affine transformations.");
+      return;
+    }
+
     Dialog<Void> dialog = new Dialog<>();
     dialog.setTitle("Edit Transformation Selection Probability");
     dialog.setHeaderText("Edit the weights for each transformation:");
@@ -462,6 +493,11 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
     VBox weightFieldsBox = new VBox(10);
     List<TextField> weightFields = new ArrayList<>();
     List<Double> weights = controller.getGame().getWeights();
+
+    if (weights == null || weights.isEmpty()) {
+      System.err.println("Failed to set weights: Weights cannot be null or empty");
+      return;
+    }
 
     for (int i = 0; i < weights.size(); i++) {
       TextField weightField = new TextField(String.format("%.2f", weights.get(i) * 100));
@@ -495,7 +531,6 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
 
 
 
-
   /**
    * Normalizes the weights to sum up to 1.
    *
@@ -508,5 +543,18 @@ public abstract class FractalView extends BorderPane implements ChaosGameObserve
   }
 
 
+  /**
+   * Checks if the UI elements are initialized.
+   *
+   * @param objects the objects to check
+   * @since 0.0.6
+   */
+  protected void checkNotNull(Object... objects) {
+    for (Object obj : objects) {
+      if (obj == null) {
+        throw new IllegalStateException("UI elements are not initialized");
+      }
+    }
+  }
 
 }

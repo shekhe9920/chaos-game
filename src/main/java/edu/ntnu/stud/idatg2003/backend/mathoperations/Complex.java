@@ -9,10 +9,12 @@ package edu.ntnu.stud.idatg2003.backend.mathoperations;
  * A complex number is represented as z = a + bi, where a is the real part and b is the imaginary part.
  * </p>
  *
- * @version 0.0.2
+ * @version 0.0.3
  * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
 public class Complex extends Vector2D {
+
+
 
 
 
@@ -62,6 +64,7 @@ public class Complex extends Vector2D {
 
 
 
+
   /**
    * Calculates the square root of this complex number.
    *
@@ -93,6 +96,7 @@ public class Complex extends Vector2D {
 
 
 
+
   /**
    * Subtracts the given vector from this complex number.
    * If the other vector is also a complex number,
@@ -110,13 +114,107 @@ public class Complex extends Vector2D {
    * @since 0.0.2
    */
   @Override
-  public Vector2D subtract(Vector2D otherVector) {
+  public Complex subtract(Vector2D otherVector) { // Return type changed to Complex
     if (otherVector instanceof Complex) {
       return new Complex(
           this.x0 - otherVector.x0, this.x1 - otherVector.x1);
     }
-    return super.subtract(otherVector);
+    return new Complex(this.x0 - otherVector.x0, this.x1 - otherVector.x1); // Ensure it returns Complex
   }
 
 
+
+
+
+
+  /**
+   * Raises this complex number to the power of the given exponent.
+   *
+   * <p>
+   * The power of a complex number z = a + bi to the exponent n is calculated as follows:
+   * Let r be the magnitude (r = sqrt(a^2 + b^2)) and theta be the angle (theta = atan2(b, a)).
+   * The power is then given by:
+   * <br>
+   * z^n = r^n * (cos(n * theta) + i * sin(n * theta))
+   * </br>
+   * </p>
+   *
+   * @param exponent The exponent to raise this complex number to.
+   * @return The result of the power as a new {@code Complex} number.
+   * @since 0.0.3
+   */
+  public Complex pow(double exponent) {
+    double real = getX0();
+    double imag = getX1();
+    double magnitude = Math.pow(Math.sqrt(real * real + imag * imag), exponent); // r^n
+    double angle = Math.atan2(imag, real) * exponent;  // n * theta
+
+    return new Complex( // Return the power as a new complex number
+        magnitude * Math.cos(angle),  // r^n * cos(n * theta)
+        magnitude * Math.sin(angle)   // r^n * sin(n * theta)
+    );
+  }
+
+
+
+
+
+  /**
+   * Returns the size (or absolute value) of this complex number.
+   *
+   * <p>
+   * The magnitude of a complex number z = a + bi is given by:
+   * <br>
+   * |z| = sqrt(a^2 + b^2)
+   * </br>
+   * </p>
+   *
+   * @return The size of this complex number.
+   * @since 0.0.3
+   */
+  public double norm() {
+    return Math.sqrt(this.getX0() * this.getX0() + this.getX1() * this.getX1());
+  }
+
+
+
+
+
+  /**
+   * Calculates the magnitude of this complex number.
+   *
+   * <p>
+   * The magnitude of a complex number z = a + bi is given by:
+   * <br>
+   * |z| = sqrt(a^2 + b^2)
+   * </br>
+   * </p>
+   *
+   * @return The magnitude of this complex number.
+   * @since 0.0.3
+   */
+  public double magnitude() {
+    return norm();
+  }
+
+
+
+
+
+  /**
+   * Calculates the angle (or argument) of this complex number.
+   *
+   * <p>
+   * The angle of a complex number z = a + bi is given by:
+   * <br>
+   * arg(z) = atan2(b, a)
+   * </br>
+   * </p>
+   *
+   * @return The angle of this complex number in radians.
+   * @since 0.0.3
+   */
+  public double angle() {
+    return Math.atan2(getX1(), getX0());
+  }
 }

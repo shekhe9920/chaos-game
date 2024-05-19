@@ -13,7 +13,7 @@ import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
  * The canvas supports transformations from fractal coordinates to canvas pixel indices,
  * allowing fractal points to be accurately plotted on the canvas.
  *
- * @version 0.0.4
+ * @version 0.0.5
  * @since 0.0.1 (The version of Chaos-Game application when introduced)
  */
 public class ChaosCanvas {
