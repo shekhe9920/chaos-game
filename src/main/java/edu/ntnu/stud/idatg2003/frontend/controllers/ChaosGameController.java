@@ -11,15 +11,18 @@ import edu.ntnu.stud.idatg2003.backend.transformations.JuliaTransform;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
 import edu.ntnu.stud.idatg2003.filehandling.ChaosGameFileHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javafx.util.Pair;
 
 /**
  * The {@code ChaosGameController} class manages the Chaos Game simulation.
  * It initializes the game, updates its state, and handles observers that monitor changes.
  *
- * @version 0.0.5
+ * @version 0.0.6
  * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGameController {
@@ -41,16 +44,16 @@ public class ChaosGameController {
   public void initializeGame(ChaosGameDescription description, int canvasWidth, int canvasHeight, int steps) {
     try {
       chaosGame = new ChaosGame(description, canvasWidth, canvasHeight);
+
       if (chaosGame.getWeights() == null || chaosGame.getWeights().isEmpty()) {
-
-        System.out.println("The list of weights is either null or empty, setting default weights");
         // setting default weights for transformations only if they are not set:
-        setTransformWeights(getDefaultWeights(description));
-
-      } else {
-
-        setTransformWeights(chaosGame.getWeights());
-
+        if (hasAffineTransformations(description)) {
+          setTransformWeights(getDefaultWeights(description));
+        }
+      } else {  // if weights are set, then they are used
+        if (hasAffineTransformations(description)) {
+          setTransformWeights(chaosGame.getWeights());
+        }
       }
 
       chaosGame.runSteps(steps); // initial steps
@@ -59,6 +62,7 @@ public class ChaosGameController {
       e.printStackTrace();
     }
   }
+
 
 
 
@@ -128,20 +132,25 @@ public class ChaosGameController {
    * @param transformations The list of transformations to apply.
    * @since 0.0.1
    */
-  public void updateGame(int steps, Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
+  public void updateGame(
+      int steps, Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
+
     if (chaosGame != null) {
       ChaosGameDescription description = chaosGame.getDescription();
       description.setMinCoords(minCoords);
       description.setMaxCoords(maxCoords);
+
       if (transformations != null) {
         description.setTransformations(new ArrayList<>(transformations));
-      } else {
+
+      } else {   // if transformations are null, then an empty list is set
         description.setTransformations(new ArrayList<>());
       }
+
+
       chaosGame.setDescription(description);
       chaosGame.getCanvas().clearCanvas();
       chaosGame.runSteps(steps);
-      System.out.println("Updated game with steps: (ChaosGameController: updateGame)" + steps);
     }
   }
 
@@ -157,12 +166,23 @@ public class ChaosGameController {
    * @param c The complex constant for the Julia set.
    * @since 0.0.4
    */
-  public void updateJuliaSetGame(int steps, Vector2D minCoords, Vector2D maxCoords, Complex c) {
-    ChaosGameDescription description = ChaosGameDescriptionFactory.createJuliaSetDescription(c);
+  public void updateJuliaSetGame(
+      int steps, Vector2D minCoords, Vector2D maxCoords, Complex c, int order) {
+
+    ChaosGameDescription description = ChaosGameDescriptionFactory.createJuliaSetDescription(c, order);
     description.setMinCoords(minCoords);
     description.setMaxCoords(maxCoords);
-    updateChaosGame(description, steps);
+
+    chaosGame.setDescription(description);
+
+    chaosGame.getCanvas().clearCanvas();
+    chaosGame.runSteps(steps);
+    notifyObserversAboutUpdate();
+    notifyObserversAboutDescriptionChange(description);
   }
+
+
+
 
 
 
@@ -176,9 +196,12 @@ public class ChaosGameController {
    * @param transformations The list of transformations to apply.
    * @since 0.0.4
    */
-  public void updateAffineTransformationGame(int steps, Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
+  public void updateAffineTransformationGame(
+      int steps, Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
+
     ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
     updateChaosGame(description, steps);
+
   }
 
 
@@ -193,12 +216,22 @@ public class ChaosGameController {
    */
   private void updateChaosGame(ChaosGameDescription description, int steps) {
     if (chaosGame != null) {
-      List<Double> currentWeights = chaosGame.getWeights();
       chaosGame.setDescription(description);
-      chaosGame.setTransformWeights(currentWeights);
+
+      // Only setting weights if there are affine transformations:
+      if (hasAffineTransformations(description)) {
+        List<Double> currentWeights = chaosGame.getWeights();
+
+        // Setting default weights if they are not set:
+        if (currentWeights == null || currentWeights.size() != description.getTransformations().size()) {
+          currentWeights = new ArrayList<>(Collections.nCopies(description.getTransformations().size(), 1.0));
+          chaosGame.setTransformWeights(currentWeights);
+        }
+      }
+
+      // Running the game with the new description:
       chaosGame.getCanvas().clearCanvas();
       chaosGame.runSteps(steps);
-      System.out.println("updateChaosGame called with steps: (ChaosGameController: updateChaosGame)" + steps);
       notifyObserversAboutUpdate();
       notifyObserversAboutDescriptionChange(description);
     }
@@ -211,18 +244,19 @@ public class ChaosGameController {
   /**
    * Saves the current fractal configuration to a file.
    *
-   * @param description The description of the Chaos Game.
-   * @param filePath The file path to save the configuration.
+   * @param path The file path to save the configuration.
    * @param typeOfTransformation The type of transformation used.
    * @since 0.0.1
    */
-  public void saveFractal(ChaosGameDescription description, String filePath, String typeOfTransformation) {
-    try {
-      ChaosGameFileHandler.writeToFile(description, filePath, typeOfTransformation);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+public void saveFractal(String path, String typeOfTransformation) {
+  try {                  // writing the Chaos Game to a file
+    ChaosGameFileHandler.writeToFile(chaosGame, path, typeOfTransformation);
+
+  } catch (IOException e) {
+    System.err.println("Failed to save fractal: " + e.getMessage());
   }
+}
+
 
 
 
@@ -230,30 +264,40 @@ public class ChaosGameController {
   /**
    * Loads a fractal configuration from a file and updates the game.
    *
-   * @param filePath The file path to load the configuration from.
-   * @return The loaded game description.
+   * @param path The file path to load the configuration from.
    * @since 0.0.1
    */
-  public ChaosGameDescription loadFractal(String filePath) {
+  public void loadFractal(String path) {
     try {
-      ChaosGameDescription description = ChaosGameFileHandler.readFile(filePath);
-      int defaultSteps = 10000; // Standard value for total steps
+      // pair of Chaos Game description and weights:
+      Pair<ChaosGameDescription, List<Double>> result = ChaosGameFileHandler.readFile(path);
+      ChaosGameDescription description = result.getKey(); // description of the Chaos Game
+      List<Double> weights = result.getValue(); // weights for the transformations
 
-      if (description.getTransformations().stream().anyMatch(JuliaTransform.class::isInstance)) {
-        JuliaTransform juliaTransform = (JuliaTransform) description.getTransformations().getFirst();
-        Complex c = juliaTransform.getPoint();
-        updateJuliaSetGame(defaultSteps, description.getMinCoords(), description.getMaxCoords(), c);
-      } else {
-        updateGame(defaultSteps, description.getMinCoords(), description.getMaxCoords(), description.getTransformations());
+      // only set weights if there are affine transformations
+      if (hasAffineTransformations(description)) {
+        // setting default weights if they are not set:
+        if (weights == null || weights.isEmpty()) {
+          throw new IllegalArgumentException("Weights cannot be null or empty");
+        }
+
+        // updating the Chaos Game with the new description and weights
+        chaosGame.updateDescription(description);
+        chaosGame.setTransformWeights(weights);
+      } else {  // if there are no affine transformations, then only the description is updated
+        chaosGame.updateDescription(description);
       }
 
-      notifyObserversAboutDescriptionChange(description);
-      return description;
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null; // Return null if error occurs
+    } catch (IOException e) {
+      System.err.println("Failed to load fractal: " + e.getMessage());
+    } catch (IllegalArgumentException e) {
+      System.err.println("Failed to set weights: " + e.getMessage());
     }
   }
+
+
+
+
 
 
 
@@ -290,7 +334,7 @@ public class ChaosGameController {
           .map(t -> (AffineTransform2D) t)
           .collect(Collectors.toList());
     }
-    return List.of(); // Returns an empty list if no description or transformations are found
+    return List.of(); // returns an empty list if no description or transformations are found
   }
 
 
@@ -303,15 +347,15 @@ public class ChaosGameController {
    * @since 0.0.5
    */
   public void setTransformWeights(List<Double> weights) {
-    System.out.println("Setting weights in ChaosGameController" + weights);
     if (chaosGame != null) {
-      System.out.println("Setting weights in ChaosGameController" + weights);
-      chaosGame.setTransformWeights(weights);
-      System.out.println("Weights set in ChaosGameController" + weights);
+      if (hasAffineTransformations(chaosGame.getDescription())) {
+        chaosGame.setTransformWeights(weights);
+      }
     } else {
       throw new IllegalStateException("Chaos game has not been initialized yet.");
     }
   }
+
 
 
 
@@ -323,7 +367,7 @@ public class ChaosGameController {
    * @since 0.0.5
    */
   public List<Double> getDefaultWeights(ChaosGameDescription description) {
-    int size = description.getTransformations().size();
+    int size = description.getTransformations().size();  // size = the number of transformations
     List<Double> weights = new ArrayList<>();
     for (int i = 0; i < size; i++) {
       weights.add(1.0 / size); // setting equal weights for all transformations
@@ -345,12 +389,64 @@ public class ChaosGameController {
   public void updateGameWithWeights(ChaosGameDescription newDescription, int steps, List<Double> weights) {
     if (chaosGame != null) {
       chaosGame.setDescription(newDescription);
-      chaosGame.setTransformWeights(weights); // setting new weights
+
+      // only setting weights if there are affine transformations
+      if (hasAffineTransformations(newDescription)) {
+        chaosGame.setTransformWeights(weights); // setting new weights
+      }
+
       chaosGame.getCanvas().clearCanvas();
       chaosGame.runSteps(steps);
       notifyObserversAboutUpdate();
       notifyObserversAboutDescriptionChange(newDescription);
     }
   }
+
+
+
+
+  /**
+   * Calculates the fractal point for a given fractal type.
+   *
+   * @param fractalType The type of fractal to calculate.
+   * @param zx The x-coordinate of the point.
+   * @param zy The y-coordinate of the point.
+   * @param order The order of the fractal.
+   * @param cRe The real part of the complex constant.
+   * @param cIm The imaginary part of the complex constant.
+   * @return The fractal point.
+   * @since 0.0.6
+   */
+  public int calculateFractalPoint(
+      String fractalType, double zx, double zy, int order, double cRe, double cIm) {
+
+    JuliaTransform transform = // creating a new JuliaTransform object
+        new JuliaTransform(new Complex(cRe, cIm), 1, order, order > 2);
+
+    return switch (fractalType) {
+
+      case "Julia Set Fractal" -> transform.calculateJuliaSetPoint(zx, zy, order, cRe, cIm);
+
+      case "Mandelbrot Set Fractal" -> transform.calculateMandelbrotSetPoint(zx, zy, order);
+
+      default -> throw new IllegalArgumentException("Unknown fractal type: " + fractalType);
+    };
+  }
+
+
+
+  /**
+   * Checks if the Chaos Game description has affine transformations.
+   * This is used to determine if weights should be set for the transformations.
+   * Helper method.
+   *
+   * @param description The description of the Chaos Game.
+   * @return {@code true} if the description has affine transformations, {@code false} otherwise.
+   * @since 0.0.6
+   */
+  private boolean hasAffineTransformations(ChaosGameDescription description) {
+    return description.getTransformations().stream().anyMatch(AffineTransform2D.class::isInstance);
+  }
+
 
 }

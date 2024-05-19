@@ -16,23 +16,31 @@ import edu.ntnu.stud.idatg2003.frontend.guicomponents.configdialog.AffineTransfo
 import java.io.File;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.paint.Color;
 
 /**
  * View class for displaying and interacting with affine transformation fractals.
  *
- * @version 0.0.6
+ * @version 0.0.7
  * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public class AffineTransformView extends FractalView {
 
 
+  // predefined affine transformation fractals:
   private static final String SIERPINSKI_TRIANGLE = "Sierpinski Triangle";
-  private static final String BARNSLEYFERN = "Barnsley Fern";
+  private static final String BARNSLEY_FERN = "Barnsley Fern";
+  private static final String DRAGON_CURVE = "Dragon Curve";
+  private static final String MAPLE_LEAF = "Maple Leaf";
+  private static final String SPIRAL = "Spiral";
+
 
   private VBox transformationsBox;
 
@@ -48,25 +56,23 @@ public class AffineTransformView extends FractalView {
    * @since 0.0.1
    */
   public AffineTransformView(ChaosGameController controller, int width, int height) {
-    super(controller, width, height);
-    setupUI();
-    initializeTransformationFields();
-    setupTransformationBindings();
-    loadTransformationsToUI(controller.getCurrentGameDescription());
+    super(controller, width, height);     // calling the constructor of the superclass
+    setupUI();                            // setting up the UI
+    drawInitialFractal(width, height);    // drawing the initial fractal
+    loadTransformationsToUI(controller.getCurrentGameDescription());// loading transformations to UI
   }
 
 
 
 
-  /**
-   * Initializes the fields for affine transformations.
-   * Currently, a placeholder for future implementation.
-   *
-   * @since 0.0.5
-   */
-  private void initializeTransformationFields() {
-    // Placeholder for initializing transformation fields if needed in the future
-  }
+//  @Override
+//  protected void initializeCoordinateFields() {
+//    minXField = new TextField("0.0");
+//    minYField = new TextField("0.0");
+//    maxXField = new TextField("1.0");
+//    maxYField = new TextField("1.0");
+//    stepsField = new TextField("100000");
+//  }
 
 
 
@@ -104,6 +110,8 @@ public class AffineTransformView extends FractalView {
 
     transformationsBox = new VBox(10);
 
+
+    // buttons for updating the fractal, showing predefined fractals, and editing transformations:
     Button updateFractalButton = new Button("Update Fractal");
     updateFractalButton.setOnAction(e -> updateFractal());
 
@@ -116,6 +124,7 @@ public class AffineTransformView extends FractalView {
     Button editWeightsButton = new Button("Edit Transformation Weight Probabilities");
     editWeightsButton.setOnAction(e -> showEditWeightsDialog());
 
+    // adding the components to the settings box:
     settingsBox.getChildren().addAll(
         new Label("Transformations:"),
         transformationsBox,
@@ -125,6 +134,7 @@ public class AffineTransformView extends FractalView {
         editWeightsButton
     );
 
+    // creating the titled pane for the settings:
     settingsPane = new TitledPane("Fractal Controller", settingsBox);
     settingsPane.setCollapsible(true);
     return settingsPane;
@@ -161,7 +171,7 @@ public class AffineTransformView extends FractalView {
     ChaosGameDescription description = controller.getCurrentGameDescription();
     description.setTransformations(new ArrayList<>(transformations));
 
-    // Re-initialize the game with new transformations
+    // re-initializing the game with new transformations
     controller.initializeGame(
         description, (int) canvas.getWidth(), (int) canvas.getHeight(), DEFAULT_STEPS
     );
@@ -182,7 +192,7 @@ public class AffineTransformView extends FractalView {
   protected void drawInitialFractal(int width, int height) {
     ChaosGameDescription description = ChaosGameDescriptionFactory.createSierpinskiTriangle();
     controller.initializeGame(description, width, height, DEFAULT_STEPS);
-    drawFractal(canvas);
+//    drawFractal(canvas);
   }
 
 
@@ -195,7 +205,8 @@ public class AffineTransformView extends FractalView {
    */
   @Override
   protected void showPredefinedFractalDialog() {
-    List<String> predefinedSets = List.of(SIERPINSKI_TRIANGLE, BARNSLEYFERN);
+    List<String> predefinedSets =
+        List.of(SIERPINSKI_TRIANGLE, BARNSLEY_FERN, DRAGON_CURVE, MAPLE_LEAF, SPIRAL);
 
     ChoiceDialog<String> dialog = new ChoiceDialog<>(predefinedSets.getFirst(), predefinedSets);
     dialog.setTitle("Predefined Affine Transformations");
@@ -208,7 +219,6 @@ public class AffineTransformView extends FractalView {
 
 
 
-
   /**
    * Applies the selected predefined transformation.
    *
@@ -216,20 +226,43 @@ public class AffineTransformView extends FractalView {
    * @since 0.0.1
    */
   private void applyPredefinedTransformation(String name) {
-    ChaosGameDescription description = switch (name) {
-      case SIERPINSKI_TRIANGLE -> ChaosGameDescriptionFactory.createSierpinskiTriangle();
-      case BARNSLEYFERN -> ChaosGameDescriptionFactory.createBarnsleyFern();
+    ChaosGameDescription description;
+    List<Double> weights = switch (name) {
+      case SIERPINSKI_TRIANGLE -> {
+        description = ChaosGameDescriptionFactory.createSierpinskiTriangle();
+        yield List.of(0.33, 0.33, 0.34);
+      }
+      case BARNSLEY_FERN -> {
+        description = ChaosGameDescriptionFactory.createBarnsleyFern();
+        yield List.of(0.01, 0.85, 0.07, 0.07);
+      }
+      case DRAGON_CURVE -> {
+        description = ChaosGameDescriptionFactory.createDragonCurve();
+        yield List.of(0.80, 0.20);
+      }
+      case MAPLE_LEAF -> {
+        description = ChaosGameDescriptionFactory.createMapleLeaf();
+        yield List.of(0.10, 0.20, 0.20, 0.50);
+      }
+      case SPIRAL -> {
+        description = ChaosGameDescriptionFactory.createSpiral();
+        yield List.of(0.787879, 0.212121);
+      }
       default -> throw new IllegalArgumentException("Unknown transformation name: " + name);
     };
 
-    // Re-initialize the game with the selected predefined transformation
+    controller.setTransformWeights(weights);
+
+    // Re-initializing the game with new transformations:
     controller.initializeGame(
         description, (int) canvas.getWidth(), (int) canvas.getHeight(), DEFAULT_STEPS
     );
+    controller.updateGameWithWeights(description, DEFAULT_STEPS, weights);
     loadTransformationsToUI(description);
     loadCoordinatesToUI(description);
     updateFractal();
   }
+
 
 
 
@@ -308,12 +341,23 @@ public class AffineTransformView extends FractalView {
     openConfig.setOnAction(e -> {
       File file = showOpenFileDialog(getScene().getWindow());
       if (file != null) {
-        ChaosGameDescription description = controller.loadFractal(file.getPath());
+
+        controller.loadFractal(file.getPath());
+        ChaosGameDescription description = controller.getCurrentGameDescription();
+        List<Double> weights = controller.getGame().getWeights();
+        int width = (int) canvas.getWidth();
+        int height = (int) canvas.getHeight();
+
+
         if (description != null) {
+
           updateUIWithDescription(description);
-          controller.initializeGame(
-              description, (int) canvas.getWidth(), (int) canvas.getHeight(), DEFAULT_STEPS);
+          loadTransformationsToUI(description);
+          loadCoordinatesToUI(description);
+          controller.initializeGame(description, width, height, DEFAULT_STEPS);
+          controller.updateGameWithWeights(description, DEFAULT_STEPS, weights);
           drawFractal(canvas);
+
         }
       }
     });
@@ -343,8 +387,9 @@ public class AffineTransformView extends FractalView {
           ChaosGameDescription currentDescription = controller.getCurrentGameDescription();
           currentDescription.setMinCoords(new Vector2D(minX, minY));
           currentDescription.setMaxCoords(new Vector2D(maxX, maxY));
+          controller.setTransformWeights(controller.getGame().getWeights());
 
-          controller.saveFractal(currentDescription, file.getPath(), "Affine2D");
+          controller.saveFractal(file.getPath(), "Affine2D");
           updateFractal();
         } catch (NumberFormatException ex) {
           System.err.println("Error parsing number: " + ex.getMessage());
@@ -365,7 +410,7 @@ public class AffineTransformView extends FractalView {
    */
   @Override
   protected void updateUIWithDescription(ChaosGameDescription description) {
-    // Implement if specific UI update is needed for Affine Transformations
+    // Placeholder for future implementation
   }
 
 
@@ -379,5 +424,62 @@ public class AffineTransformView extends FractalView {
    */
   private void setupTransformationBindings() {
     // Placeholder for setting up bindings if needed in the future
+  }
+
+
+
+  /**
+   * Draws the fractal on the canvas.
+   *
+   * @param canvas the canvas to draw on
+   * @since 0.0.7
+   */
+  @Override
+  protected void drawFractal(Canvas canvas) {
+    GraphicsContext gc = canvas.getGraphicsContext2D();
+    if (gc == null) {
+      throw new IllegalStateException("GraphicsContext not available");
+    }
+
+    int[][] hitCounts = controller.getGame().getCanvas().getHitCounts();
+    int maxHits = getMaxHits(hitCounts);
+
+    // filling the canvas with white color
+    Color backgroundColor = Color.WHITE; // The background color of the canvas
+    gc.setFill(backgroundColor);
+    gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+    // drawing the fractal based on the hit counts
+    for (int i = 0; i < hitCounts.length; i++) {
+      for (int j = 0; j < hitCounts[i].length; j++) {
+        if (hitCounts[i][j] > 0) {
+          double intensity = (double) hitCounts[i][j] / maxHits;
+          gc.setFill(getColorForIntensity(intensity));
+          gc.fillRect(j, canvas.getHeight() - i, 1, 1);
+        }
+      }
+    }
+  }
+
+
+
+  /**
+   * Returns the maximum hit count for the pixels.
+   * This is used to calculate the intensity of the color.
+   *
+   * @param hitCounts the hit counts for each pixel
+   * @return the color for the intensity
+   * @since 0.0.7
+   */
+  private int getMaxHits(int[][] hitCounts) {
+    int maxHits = 1;
+    for (int[] row : hitCounts) {
+      for (int hitCount : row) {
+        if (hitCount > maxHits) {
+          maxHits = hitCount;
+        }
+      }
+    }
+    return maxHits;
   }
 }

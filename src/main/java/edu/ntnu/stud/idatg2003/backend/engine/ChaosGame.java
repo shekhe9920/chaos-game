@@ -2,6 +2,7 @@ package edu.ntnu.stud.idatg2003.backend.engine;
 
 import edu.ntnu.stud.idatg2003.backend.ChaosGameObserver;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
 import edu.ntnu.stud.idatg2003.backend.utilitiesbackend.WeightedRandomSampler;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
  * Observers can be attached to monitor changes in the game's state,
  * such as updates to the game description.
  *
- * @version 0.0.5
+ * @version 0.0.6
  * @since 0.0.1 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGame {
@@ -78,12 +79,18 @@ public class ChaosGame {
    * @since 0.0.5
    */
   public void setTransformWeights(List<Double> weights) {
-    if (weights == null || weights.isEmpty()) {
-      throw new IllegalArgumentException("Weights cannot be null or empty");
+
+    if (hasAffineTransforms()) {
+      if (weights == null || weights.isEmpty()) {
+        throw new IllegalArgumentException("Weights cannot be null or empty");
+      }
+      this.weights = weights;
+      this.weightedRandom = new WeightedRandomSampler(weights);
+      System.out.println("Weights set in setTransformWeights: " + weights.size());
+      System.out.println("Weights: " + "[" + weights + "]");
     }
-    this.weights = weights;
-    this.weightedRandom = new WeightedRandomSampler(weights);
   }
+
 
 
 
@@ -111,21 +118,34 @@ public class ChaosGame {
    * @since 0.0.1
    */
   public void runSteps(int steps) {
-    if (weights == null || weights.isEmpty()) {
-      throw new IllegalStateException("Weights are not set.");
+    // Check if the chaos game description contains affine transformations:
+    if (hasAffineTransforms()) {
+      if (weights == null || weights.isEmpty()) {
+        throw new IllegalStateException("Weights are not set.");
+      }
+      if (description.getTransformations().size() != weights.size()) {
+        throw new IllegalStateException("Number of transformations and weights do not match.");
+      }
     }
 
-    lastRunSteps = steps; // Storing the number of steps for later retrieval
+    lastRunSteps = steps; // storing the number of steps for later retrieval
 
+    // Iterating over the specified number of steps:
     for (int i = 0; i < steps; i++) {
-      int index = weightedRandom.nextIndex();
+      int index =           // selecting a random transformation index based on weights or uniformly
+          hasAffineTransforms() ? weightedRandom.nextIndex() : i // using weights for affine transforms
+              % description.getTransformations().size();     // using uniform sampling for other transforms
+
       Transform2D transformation = description.getTransformations().get(index);
 
       currentPoint = transformation.transform(currentPoint);
       canvas.putPixel(currentPoint, 1); // '1' is the color value for a plotted point
     }
-    notifyObserversGameUpdated(); // Notifying observers only once after all steps
+    notifyObserversGameUpdated(); // notifying observers only once after all steps
   }
+
+
+
 
 
 
@@ -148,23 +168,39 @@ public class ChaosGame {
    * Each pixel set to '1' on the canvas is represented as an 'x';
    * otherwise, a space character is printed.
    * This provides a textual visualization of the fractal pattern.
+   * Improved since the introduction of the method of multi-order Julia sets and
+   * weights for selecting transformations.
    *
+   *
+   * @param displayWidth  The width of the display area for the fractal.
    * @since 0.0.1
    */
-  public void printFractal() {
+  public void printFractal(int displayWidth, int displayHeight) {
     int[][] pixelArray = canvas.getCanvasArray();
-    // Starting from the last row and ending at the first row to flip the fractal vertically:
-    for (int i = pixelArray.length - 1; i >= 0; i--) {
-      for (int j = 0; j < pixelArray[i].length; j++) {
-        if (pixelArray[i][j] == 1) {
-          System.out.print("x");
+    StringBuilder builder = new StringBuilder();
+
+    // calculating scaling factors to fit the fractal within the specified display dimensions
+    double scaleX = (double) pixelArray[0].length / displayWidth; // scaling factor for the x-axis
+    double scaleY = (double) pixelArray.length / displayHeight;   // scaling factor for the y-axis
+
+    for (int y = displayHeight - 1; y >= 0; y--) {  // iterating from top to bottom
+      for (int x = 0; x < displayWidth; x++) {   // iterating from left to right
+
+        int pixelX = (int) (x * scaleX);  // calculating the corresponding pixel x-coordinate
+        int pixelY = (int) (y * scaleY);  // calculating the corresponding pixel y-coordinate
+
+        if (pixelArray[pixelY][pixelX] > 0) {  // checking if the pixel is set
+          builder.append("x"); // printing 'x' for a plotted point
         } else {
-          System.out.print(" ");
+          builder.append(" "); // printing a space for an empty point
         }
       }
-      System.out.println();
+      builder.append("\n"); // moving to the next line after each row
     }
+
+    System.out.print(builder.toString()); // printing the fractal to the console
   }
+
 
 
 
@@ -304,6 +340,21 @@ public class ChaosGame {
       // Notifying the observers only if there is an actual change
       notifyDescriptionChanged(newDescription);
     }
+  }
+
+
+
+  /**
+   * Checks if the chaos game description contains affine transformations.
+   * This method is used to determine whether the chaos game should use
+   * weighted random sampling for selecting transformations.
+   *
+   * @return {@code true} if the description contains affine transformations,
+   * {@code false} otherwise.
+   * @since 0.0.5
+   */
+  private boolean hasAffineTransforms() {
+    return description.getTransformations().stream().anyMatch(AffineTransform2D.class::isInstance);
   }
 
 }
