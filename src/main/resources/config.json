@@ -1,0 +1,51 @@
+{
+  "description": {
+    "minCoords": {
+      "x0": -6.8,
+      "x1": -2.5
+    },
+    "maxCoords": {
+      "x0": 2.6,
+      "x1": 8.0
+    },
+    "transformations": [
+      {
+        "type": "AffineTransform2D",
+        "properties": {
+          "matrix": {
+            "a00": 0.824074,
+            "a01": 0.281428,
+            "a10": -0.212346,
+            "a11": 0.864198
+          },
+          "vector": {
+            "x0": -1.88229,
+            "x1": -0.110607
+          }
+        }
+      },
+      {
+        "type": "AffineTransform2D",
+        "properties": {
+          "matrix": {
+            "a00": 0.088272,
+            "a01": 0.520988,
+            "a10": -0.463889,
+            "a11": -0.377778
+          },
+          "vector": {
+            "x0": -0.996432,
+            "x1": -0.107766
+          }
+        }
+      }
+    ]
+  },
+  "canvasWidth": 650,
+  "canvasHeight": 400,
+  "weights": [
+    0.5,
+    0.5
+  ],
+  "lastRunSteps": 100000
+}

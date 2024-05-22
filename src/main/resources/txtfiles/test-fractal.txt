@@ -1,0 +1,7 @@
+Affine2D                # Type of transform
+-2.65, 0                # lower left
+2.65, 10                # upper right
+0, .16, 0, .16, 0, .16, .25      # stem transformation (1. transformation, a00, a01, a10, a11, b0, b1, weight)
+.85, .04, -.04, .85, 0, 1.6, .25   # smaller leaf transformation
+-.2, -.26, .23, .22, 0, 1.6, .25    # larger leaf transformation
+-.15, .28, 0, .24, 0, .44, .25   # final leaf transformation
