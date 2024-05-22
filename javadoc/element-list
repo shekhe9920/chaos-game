@@ -1,0 +1,15 @@
+edu.ntnu.stud.idatg2003
+edu.ntnu.stud.idatg2003.backend
+edu.ntnu.stud.idatg2003.backend.engine
+edu.ntnu.stud.idatg2003.backend.mathoperations
+edu.ntnu.stud.idatg2003.backend.state
+edu.ntnu.stud.idatg2003.backend.transformations
+edu.ntnu.stud.idatg2003.backend.utilitiesbackend
+edu.ntnu.stud.idatg2003.commonutilities.errorutilitie
+edu.ntnu.stud.idatg2003.commonutilities.filehandling
+edu.ntnu.stud.idatg2003.commonutilities.validation
+edu.ntnu.stud.idatg2003.frontend.controllers
+edu.ntnu.stud.idatg2003.frontend.guicomponents.configdialog
+edu.ntnu.stud.idatg2003.frontend.utilityfrontend
+edu.ntnu.stud.idatg2003.frontend.view
+edu.ntnu.stud.idatg2003.terminalinterfaceapplication
