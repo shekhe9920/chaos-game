@@ -1,15 +1,15 @@
 package edu.ntnu.stud.idatg2003.frontend.utilityfrontend;
 
+import java.io.File;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
-import java.io.File;
 
 /**
  * Utility class for common functions used in FractalView.
  *
- * @version 0.0.1
+ * @version 0.0.2
  * @since 0.0.4 (The version of Chaos-Game application when introduced)
  */
 public class FractalViewUtility {
@@ -55,15 +55,6 @@ public class FractalViewUtility {
       return Integer.parseInt(text);
     } catch (NumberFormatException e) {
       return 0;
-    }
-  }
-
-  public static double parseStringToDouble(String input) {
-    try {
-      return Double.parseDouble(input.replace(",", "."));
-    } catch (NumberFormatException e) {
-      System.err.println("Invalid input format: " + e.getMessage());
-      return 0; // TODO: Return a default value or handle this case appropriately
     }
   }
 

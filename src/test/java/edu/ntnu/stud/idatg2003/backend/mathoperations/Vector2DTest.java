@@ -17,7 +17,9 @@ class Vector2DTest {
 
 
 
-
+  /**
+   * Test that creating a Vector2D object with valid coordinates does not throw an exception.
+   */
   @Test
   void createVector2D_WithValidCoordinates_ShouldSucceed() {
     assertDoesNotThrow(() -> new Vector2D(1.0, 2.0),
@@ -26,7 +28,9 @@ class Vector2DTest {
 
 
 
-
+  /**
+   * Test that creating a Vector2D object with invalid coordinates throws an exception.
+   */
   @Test
   void createVector2D_WithInvalidCoordinates_ShouldThrowException() {
     assertThrows(IllegalArgumentException.class, () -> new Vector2D(Double.NaN, 1.0),
@@ -38,6 +42,9 @@ class Vector2DTest {
 
 
 
+  /**
+   * Test that creating a Vector2D object with valid coordinates sets the coordinates correctly.
+   */
   @Test
   void constructor_ShouldCreateVectorWithGivenCoordinates() {
     Vector2D vector = new Vector2D(1.0, 2.0);
@@ -48,6 +55,9 @@ class Vector2DTest {
 
 
 
+  /**
+   * Test the addition of two vectors.
+   */
   @Test
   void add_TwoVectors_ShouldReturnCorrectSum() {
     Vector2D v1 = new Vector2D(1, 2);
@@ -61,6 +71,9 @@ class Vector2DTest {
 
 
 
+  /**
+   * Test that adding a null vector throws an exception.
+   */
   @Test
   void add_NullVector_ShouldThrowException() {
     Vector2D v1 = new Vector2D(1, 2);
@@ -72,6 +85,9 @@ class Vector2DTest {
 
 
 
+  /**
+   * Test the subtraction of two vectors.
+   */
   @Test
   void subtract_TwoVectors_ShouldReturnCorrectDifference() {
     Vector2D v1 = new Vector2D(5, 5);
@@ -85,7 +101,9 @@ class Vector2DTest {
 
 
 
-  // Test that adding a Vector2D to a Complex returns a Complex
+  /**
+   * Test that subtracting a vector to complex number returns a complex number.
+   */
   @Test
   void add_VectorToComplex_ShouldReturnComplex() {
     Vector2D v1 = new Vector2D(1, 2);
@@ -96,4 +114,5 @@ class Vector2DTest {
     Assertions.assertEquals(4.0, result.getX0(), "Real part of result is incorrect.");
     Assertions.assertEquals(6.0, result.getX1(), "Imaginary part of result is incorrect.");
   }
+
 }

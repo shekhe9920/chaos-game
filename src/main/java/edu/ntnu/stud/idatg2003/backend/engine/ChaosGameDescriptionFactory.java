@@ -238,13 +238,12 @@ public class ChaosGameDescriptionFactory {
    * The bounds for this fractal are set to commonly used values for Mandelbrot sets,
    * but may need adjustment based on the characteristics of the specific set being generated.
    *
-   * @param order The order of the Mandelbrot set
-   *              (e.g., 2 for standard Mandelbrot set, 3 for a cubic Mandelbrot set).
+   *
    * @return A {@code ChaosGameDescription} instance configured for a Mandelbrot set
    * based on the given order.
    * @since 0.0.2
    */
-  public static ChaosGameDescription createMandelbrotSetDescription(int order) {
+  public static ChaosGameDescription createMandelbrotSetDescription() {
     Vector2D minCoords = new Vector2D(-2.5, -2);  // Lower left corner
     Vector2D maxCoords = new Vector2D(1.5, 2);    // Upper right corner
 

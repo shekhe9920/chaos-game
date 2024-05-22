@@ -1,6 +1,5 @@
 package edu.ntnu.stud.idatg2003.backend.transformations;
 
-import static edu.ntnu.stud.idatg2003.frontend.utilityfrontend.FractalViewUtility.parseTextFieldToDouble;
 
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Complex;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
@@ -10,7 +9,7 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
  * z -> ±(z - c)^(1/n), where z is a complex number, and c is a complex constant.
  * This transformation is used in generating Julia sets, a type of fractal.
  *
- * @version 0.0.3
+ * @version 0.0.4
  * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
 public class JuliaTransform implements Transform2D {
@@ -19,7 +18,7 @@ public class JuliaTransform implements Transform2D {
   private Complex point; // Represents the complex constant 'c'
   private int sign;      // Represents the sign of the transformation, which must be either 1 or -1
   private int order;     // Represents the order of the transformation
-  private boolean isMultiOrder; // Indicates if the transformation is a multi-order Julia set
+  private final boolean isMultiOrder; // Indicates if the transformation is a multi-order Julia set
 
 
 
@@ -98,20 +97,6 @@ public class JuliaTransform implements Transform2D {
 
 
 
-
-  /**
-   * Gets the sign of the Julia transformation vector.
-   *
-   * @return The sign.
-   * @since 0.0.0
-   */
-  public int getSign() {
-    return sign;
-  }
-
-
-
-
   /**
    * Gets the point of the Julia transformation vector.
    *
@@ -151,13 +136,13 @@ public class JuliaTransform implements Transform2D {
 
 
   /**
-   * Transforms a given complex number {@code z} according to the transformation z -> ±(z - c)^(1/n).
+   * Transforms a given complex number {@code z} according to the transformation
+   * 'z -> ±(z - c)^(1/n)'.
    *
    * <p>
    * This method calculates the nth root of the difference between the input complex number and
    * the complex constant 'c'. The sign of the root is determined by the {@code sign} field
    * of this {@code JuliaTransform} object.
-   *
    * The transformation is given by:
    * <pre>
    * z' = ±(z - c)^(1/n)
@@ -237,14 +222,20 @@ public class JuliaTransform implements Transform2D {
    * @return The number of iterations before the point escapes the Julia set boundary.
    * @since 0.0.4
    */
-  public int calculateJuliaSetPoint(double zx, double zy, int order, double cRe, double cIm) {
+  public int calculateJuliaSetPoint(double zx, double zy, int order, double cRe, double cIm, int maxIterations) {
+    if (order <= 0) {
+      throw new IllegalArgumentException("Order must be a positive integer");
+    }
+    if (maxIterations <= 0) {
+      throw new IllegalArgumentException("Max iterations must be a positive integer");
+    }
+
     Complex c = new Complex(cRe, cIm);  // The constant complex number
-    int maxIteration = 1000;        // The maximum number of iterations
     Complex z = new Complex(zx, zy);    // The complex number to iterate
     int iteration = 0;            // starting iteration
     double escapeRadius = 4.0;    // The escape radius
 
-    while (iteration < maxIteration && z.norm() < escapeRadius) {
+    while (iteration < maxIterations && z.norm() < escapeRadius) {
       z = iterate(z, c, order);  // Applying the transformation
       iteration++;          // Incrementing the iteration
     }
@@ -256,14 +247,15 @@ public class JuliaTransform implements Transform2D {
 
 
 
+
   /**
    * Calculates the number of iterations for a given point in the Mandelbrot set.
    *
    * <p>
    * This method calculates how many iterations a complex number goes through before escaping
    * a predefined radius (escape radius). The iteration process involves applying the transformation
-   * defined by the Mandelbrot set formula repeatedly until the magnitude of the resulting complex number
-   * exceeds the escape radius or the maximum number of iterations is reached.
+   * defined by the Mandelbrot set formula repeatedly until the magnitude of the resulting
+   * complex number exceeds the escape radius or the maximum number of iterations is reached.
    * </p>
    *
    * <p>
@@ -282,17 +274,25 @@ public class JuliaTransform implements Transform2D {
    * @param cx The real part of the constant complex number.
    * @param cy The imaginary part of the constant complex number.
    * @param order The order of the transformation.
+   * @param maxIterations The maximum number of iterations to perform.
+   * @throws IllegalArgumentException If the order or maxIterations is not positive.
    * @return The number of iterations before the point escapes the Mandelbrot set boundary.
    * @since 0.0.3
    */
-  public int calculateMandelbrotSetPoint(double cx, double cy, int order) {
+  public int calculateMandelbrotSetPoint(double cx, double cy, int order, int maxIterations) {
+    if (order <= 0) {
+      throw new IllegalArgumentException("Order must be a positive integer");
+    }
+    if (maxIterations <= 0) {
+      throw new IllegalArgumentException("Max iterations must be a positive integer");
+    }
+
     Complex c = new Complex(cx, cy);  // The constant complex number
-    int maxIteration = 1000;    // The maximum number of iterations
     Complex z = new Complex(0, 0);  // The complex number to iterate
     int iteration = 0;      // starting iteration
     double escapeRadius = 4.0;  // The escape radius
 
-    while (iteration < maxIteration && z.norm() < escapeRadius) {
+    while (iteration < maxIterations && z.norm() < escapeRadius) {
       z = iterate(z, c, order);  // Applying the transformation
       iteration++;     // Incrementing the iteration
     }
@@ -333,25 +333,35 @@ public class JuliaTransform implements Transform2D {
    * @param z The current complex number in the iteration process.
    * @param c The constant complex number.
    * @param order The order of the transformation.
+   * @throws IllegalArgumentException If the complex number z or c is null,
+   * or if the order is not positive.
    * @return The next complex number after applying the transformation.
    * @since 0.0.3
    */
-  private Complex iterate(Complex z, Complex c, int order) {
+  public Complex iterate(Complex z, Complex c, int order) {
+    if (order <= 0) {
+      throw new IllegalArgumentException("Order must be a positive integer");
+    }
+
+
     Complex result;  // The result of the transformation
 
     if (order == 2) {  // Checking if the order is 2
       result = (Complex) z.multiply(z).add(c); // result = z^2 + c
-      return result;
 
     } else { // For orders greater than 2
       // Calculating the magnitude of z to the power of order:
       double magnitude = Math.pow(z.magnitude(), order);
       double angle = z.angle() * order; // angle of z to the power of order
+
+      // result = z^order:
       result =
-          (Complex) new Complex( // result = z^order
+          (Complex) new Complex(
               magnitude * Math.cos(angle), magnitude * Math.sin(angle)).add(c);
-      return result;
+
     }
+
+    return result; // Return: The next complex number in the iteration process
   }
 
 

@@ -1,11 +1,13 @@
 package edu.ntnu.stud.idatg2003.frontend.view;
 
+import static edu.ntnu.stud.idatg2003.frontend.utilityfrontend.ActionHandlerUtil.setButtonAction;
+
 import edu.ntnu.stud.idatg2003.frontend.controllers.MainViewController;
-import edu.ntnu.stud.idatg2003.frontend.utilityfrontend.Action;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Button;
+
 
 /**
  * The {@code MainView} class represents the main view of the application.
@@ -15,13 +17,6 @@ import javafx.scene.control.Button;
  * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public class MainView extends BorderPane {
-
-
-  private final Button affineTransformButton;  // Button for affine transformations
-  private final Button juliaSetButton;         // Button for Julia set
-  private final Button exitButton;             // Button to exit the application
-
-
 
 
   /**
@@ -36,20 +31,27 @@ public class MainView extends BorderPane {
     root.setStyle("-fx-background-color: #333;"); // Set a dark background
     this.setStyle("-fx-background-color: #333;");
 
+
     // Buttons Initializations:
-    affineTransformButton = new Button("Affine Transformations");
-    juliaSetButton = new Button("Julia Set");
-    exitButton = new Button("Exit");
+    // Button for affine transformations
+    Button affineTransformButton = new Button("Affine Transformations");
+    // Button for Julia set
+    Button juliaSetButton = new Button("Julia Set");
+    // Button to exit the application
+    Button exitButton = new Button("Exit");
+
 
     // Styling buttons
     styleButton(affineTransformButton);
     styleButton(juliaSetButton);
     styleButton(exitButton);
 
-    // Setting button actions using the buttonAction method
-    buttonAction(affineTransformButton, controller::switchToAffineTransformationView);
-    buttonAction(juliaSetButton, controller::switchToJuliaSetView);
-    buttonAction(exitButton, controller::handleExit);
+
+    // Setting button actions using the util class
+    setButtonAction(affineTransformButton, controller::switchToAffineTransformationView);
+    setButtonAction(juliaSetButton, controller::switchToJuliaSetView);
+    setButtonAction(exitButton, controller::handleExit);
+
 
     // Button arrangements in a vertical box:
     VBox buttonBox = new VBox(10); // 10 is the spacing between buttons
@@ -60,22 +62,6 @@ public class MainView extends BorderPane {
 
     this.setCenter(buttonBox);
   }
-
-
-
-
-  /**
-   * Sets the enabled/disabled state of all buttons.
-   *
-   * @param disabled True to disable the buttons, false to enable them.
-   * @since 0.0.1
-   */
-  public void setButtonsDisabled(boolean disabled) {
-    affineTransformButton.setDisable(disabled);
-    juliaSetButton.setDisable(disabled);
-    exitButton.setDisable(disabled);
-  }
-
 
 
 
@@ -95,21 +81,4 @@ public class MainView extends BorderPane {
 
 
 
-
-  /**
-   * Sets the action for the button.
-   *
-   * @param button The button to set the action for.
-   * @param action The action to perform when the button is pressed.
-   * @since 0.0.4
-   */
-  private void buttonAction(Button button, Action action) {
-    button.setOnAction(e -> {
-      try {
-        action.perform();
-      } catch (Exception ex) {
-        throw new RuntimeException(ex);
-      }
-    });
-  }
 }

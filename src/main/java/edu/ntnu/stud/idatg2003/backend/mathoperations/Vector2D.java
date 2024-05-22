@@ -1,11 +1,13 @@
 package edu.ntnu.stud.idatg2003.backend.mathoperations;
 
+import java.util.Objects;
+
 /**
  * {@code Vector2D} is a class representing a 2-dimensional vector.
  * The {@code x0} and {@code x1} are the coordinates or components of the vector,
  * representing the x and y components of a vector respectively.
  *
- * @version 0.0.2
+ * @version 0.0.3
  * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
 public class Vector2D {
@@ -67,7 +69,6 @@ public class Vector2D {
    * @since 0.0.0
    */
   public Vector2D add(Vector2D otherVector) {
-// TODO: Remove "instaceof" if not used by Complex
     if (otherVector != null) {
       if (otherVector instanceof Complex) {
         return new Complex(this.x0 + otherVector.x0, this.x1 + otherVector.x1);
@@ -130,6 +131,50 @@ public class Vector2D {
    */
   public double getX1() {
     return x1;
+  }
+
+
+
+  /**
+   * Returns a string representation of the vector.
+   *
+   * @return A string representation of the vector.
+   * @since 0.0.3
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Vector2D vector2D = (Vector2D) o;
+    return Double.compare(vector2D.x0, x0) == 0 &&
+        Double.compare(vector2D.x1, x1) == 0;
+  }
+
+
+  /**
+   * Returns a hash code value for the vector.
+   *
+   * @return A hash code value for this vector.
+   * @since 0.0.3
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(x0, x1);
+  }
+
+
+  /**
+   * Returns a string representation of the vector.
+   *
+   * @return A string representation of the vector.
+   * @since 0.0.3
+   */
+  @Override
+  public String toString() {
+    return "Vector2D{" +
+        "x0=" + x0 +
+        ", x1=" + x1 +
+        '}';
   }
 
 }

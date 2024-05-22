@@ -1,7 +1,7 @@
 package edu.ntnu.stud.idatg2003.backend.mathoperations;
 
 /**
- * {@code Matrix2x2} is a class representing a 2x2 matrix.
+ * {@code Matrix2x2} is a record class representing a 2x2 matrix.
  *
  * <p>
  * A 2x2 matrix is represented as:
@@ -11,20 +11,11 @@ package edu.ntnu.stud.idatg2003.backend.mathoperations;
  * </pre>
  * </p>
  *
- * @version 0.0.2
+ * @param a00 The matrix elements:
+ * @version 0.0.3
  * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
-public class Matrix2x2 {
-
-  // The matrix elements:
-  private final double a00;
-  private final double a01;
-  private final double a10;
-  private final double a11;
-
-
-
-
+public record Matrix2x2(double a00, double a01, double a10, double a11) {
 
   /**
    * Constructs a new {@code Matrix2x2} object with the given components.
@@ -36,19 +27,13 @@ public class Matrix2x2 {
    * @throws IllegalArgumentException if any of the values are not valid numbers.
    * @since 0.0.0
    */
-  public Matrix2x2(double a00, double a01, double a10, double a11) {
+  public Matrix2x2 {
     validateElement(a00);
     validateElement(a01);
     validateElement(a10);
     validateElement(a11);
 
-    this.a00 = a00;
-    this.a01 = a01;
-    this.a10 = a10;
-    this.a11 = a11;
   }
-
-
 
 
   /**
@@ -66,8 +51,6 @@ public class Matrix2x2 {
 
 
 
-
-  // TODO: det samme metoden er i Complex klassen
   /**
    * Multiplies this matrix by a given {@code Vector2D}.
    *
@@ -91,8 +74,6 @@ public class Matrix2x2 {
   }
 
 
-
-
   /**
    * Gets the matrix element at the specified row and column.
    *
@@ -114,8 +95,6 @@ public class Matrix2x2 {
   }
 
 
-
-
   /**
    * Returns a 2D array representation of the matrix.
    *
@@ -126,51 +105,6 @@ public class Matrix2x2 {
     return new double[][]{{a00, a01}, {a10, a11}};
   }
 
-
-
-
-
-  // Getter methods for the matrix elements:
-
-  /**
-   * Gets the element at row 0, column 0.
-   *
-   * @return The value at row 0, column 0.
-   * @since 0.0.0
-   */
-  public double getA00() {
-    return a00;
-  }
-
-  /**
-   * Gets the element at row 0, column 1.
-   *
-   * @return The value at row 0, column 1.
-   * @since 0.0.0
-   */
-  public double getA01() {
-    return a01;
-  }
-
-  /**
-   * Gets the element at row 1, column 0.
-   *
-   * @return The value at row 1, column 0.
-   * @since 0.0.0
-   */
-  public double getA10() {
-    return a10;
-  }
-
-  /**
-   * Gets the element at row 1, column 1.
-   *
-   * @return The value at row 1, column 1.
-   * @since 0.0.0
-   */
-  public double getA11() {
-    return a11;
-  }
 
 }
 

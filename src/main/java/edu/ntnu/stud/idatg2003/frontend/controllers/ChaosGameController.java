@@ -1,35 +1,45 @@
 package edu.ntnu.stud.idatg2003.frontend.controllers;
 
+import static edu.ntnu.stud.idatg2003.commonutilities.errorutilitie.ErrorHandler.GAME_NOT_INITIALIZED;
+
 import edu.ntnu.stud.idatg2003.backend.ChaosGameObserver;
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGame;
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescriptionFactory;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Complex;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.state.AppState;
 import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
 import edu.ntnu.stud.idatg2003.backend.transformations.JuliaTransform;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
-import edu.ntnu.stud.idatg2003.filehandling.ChaosGameFileHandler;
-
+import edu.ntnu.stud.idatg2003.backend.utilitiesbackend.ConfigManager;
+import edu.ntnu.stud.idatg2003.commonutilities.errorutilitie.ErrorHandler;
+import edu.ntnu.stud.idatg2003.commonutilities.filehandling.ChaosGameFileHandler;
+import edu.ntnu.stud.idatg2003.frontend.utilityfrontend.GuiErrorDisplay;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.logging.Logger;
 import javafx.util.Pair;
 
 /**
  * The {@code ChaosGameController} class manages the Chaos Game simulation.
  * It initializes the game, updates its state, and handles observers that monitor changes.
  *
- * @version 0.0.6
+ * @version 0.0.7
  * @since 0.0.3 (The version of Chaos-Game application when introduced)
  */
 public class ChaosGameController {
 
+  // Logger for the ChaosGameController class
+  private static final Logger LOGGER = Logger.getLogger(ChaosGameController.class.getName());
+
+
   private ChaosGame chaosGame;  // The Chaos Game instance
   private final List<ChaosGameObserver> observers = new ArrayList<>(); // List of observers
 
+  private final boolean isInitialLoad = true;  // flag to check if the game is being initialized
 
 
 
@@ -41,7 +51,9 @@ public class ChaosGameController {
    * @param canvasHeight The height of the canvas in pixels.
    * @since 0.0.1
    */
-  public void initializeGame(ChaosGameDescription description, int canvasWidth, int canvasHeight, int steps) {
+  public void initializeGame(
+      ChaosGameDescription description, int canvasWidth, int canvasHeight, int steps) {
+
     try {
       chaosGame = new ChaosGame(description, canvasWidth, canvasHeight);
 
@@ -57,11 +69,96 @@ public class ChaosGameController {
       }
 
       chaosGame.runSteps(steps); // initial steps
+//      chaosGame.runIterations(steps);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      ErrorHandler.handleException(e, LOGGER.getName());
+      GuiErrorDisplay.showError("An error occurred while initializing the Chaos Game.");
     }
+
   }
+
+
+
+
+
+
+  /**
+   * Loads the Chaos Game state from the configuration file.
+   * If the state is successfully loaded, the game is updated and the observers are notified.
+   * If the state cannot be loaded, the game is initialized with default values.
+   *
+   * @since 0.0.1
+   */
+  private boolean loadState() {
+    AppState state = ConfigManager.loadConfig();
+    if (state != null && state.getDescription() != null) {
+      ChaosGameDescription description = state.getDescription();
+      int canvasWidth = state.getCanvasWidth();
+      int canvasHeight = state.getCanvasHeight();
+      int steps = state.getLastRunSteps();
+
+      try {
+        chaosGame = new ChaosGame(description, canvasWidth, canvasHeight);
+
+        List<Double> weights = state.getWeights();
+        if (weights != null && weights.size() == description.getTransformations().size()) {
+          chaosGame.setTransformWeights(weights);
+        } else {
+          chaosGame.setTransformWeights(getDefaultWeights(description));
+        }
+
+        chaosGame.runSteps(steps);
+//        chaosGame.runIterations(steps);
+        notifyObserversAboutUpdate();
+        return true;
+      } catch (Exception e) {
+        ErrorHandler.handleException(e, LOGGER.getName());
+        GuiErrorDisplay.showError("An error occurred while loading the Chaos Game state.");
+      }
+    }
+    return false;
+  }
+
+
+
+  /**
+   * Saves the current Chaos Game state to the configuration file, allowing it to be loaded later.
+   *
+   *
+   * @since 0.0.7
+   */
+  private void saveState() {
+    AppState newState = new AppState();
+    newState.setDescription(chaosGame.getDescription());
+    newState.setCanvasWidth(getCanvasWidth());
+    newState.setCanvasHeight(getCanvasHeight());
+    newState.setWeights(chaosGame.getWeights());
+    newState.setLastRunSteps(chaosGame.getSteps());
+    ConfigManager.saveConfig(newState);
+  }
+
+
+  /**
+   * Retrieves the width of the canvas.
+   *
+   * @return The width of the canvas.
+   * @since 0.0.7
+   */
+  private int getCanvasWidth() {
+    return chaosGame.getCanvas().getWidth();
+  }
+
+  /**
+   * Retrieves the height of the canvas.
+   *
+   * @return The height of the canvas.
+   * @since 0.0.7
+   */
+  private int getCanvasHeight() {
+    return chaosGame.getCanvas().getHeight();
+  }
+
 
 
 
@@ -151,6 +248,8 @@ public class ChaosGameController {
       chaosGame.setDescription(description);
       chaosGame.getCanvas().clearCanvas();
       chaosGame.runSteps(steps);
+    } else {
+      throw new IllegalStateException(GAME_NOT_INITIALIZED);
     }
   }
 
@@ -158,7 +257,8 @@ public class ChaosGameController {
 
 
   /**
-   * Updates the Chaos Game for a Julia set with new parameters and runs the specified number of steps.
+   * Updates the Chaos Game for a Julia set with new parameters
+   * and runs the specified number of steps.
    *
    * @param steps The number of steps to run.
    * @param minCoords The minimum coordinates of the canvas.
@@ -169,16 +269,24 @@ public class ChaosGameController {
   public void updateJuliaSetGame(
       int steps, Vector2D minCoords, Vector2D maxCoords, Complex c, int order) {
 
-    ChaosGameDescription description = ChaosGameDescriptionFactory.createJuliaSetDescription(c, order);
-    description.setMinCoords(minCoords);
-    description.setMaxCoords(maxCoords);
+    try {
 
-    chaosGame.setDescription(description);
+      ChaosGameDescription description =
+          ChaosGameDescriptionFactory.createJuliaSetDescription(c, order);
+      description.setMinCoords(minCoords);
+      description.setMaxCoords(maxCoords);
 
-    chaosGame.getCanvas().clearCanvas();
-    chaosGame.runSteps(steps);
-    notifyObserversAboutUpdate();
-    notifyObserversAboutDescriptionChange(description);
+      chaosGame.setDescription(description);
+
+      chaosGame.getCanvas().clearCanvas();
+      chaosGame.runSteps(steps);
+      notifyObserversAboutUpdate();
+      notifyObserversAboutDescriptionChange(description);
+
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+      GuiErrorDisplay.showError("An error occurred while updating the Julia Set.");
+    }
   }
 
 
@@ -188,7 +296,8 @@ public class ChaosGameController {
 
 
   /**
-   * Updates the Chaos Game for an affine transformation with new parameters and runs the specified number of steps.
+   * Updates the Chaos Game for an affine transformation with new parameters
+   * and runs the specified number of steps.
    *
    * @param steps The number of steps to run.
    * @param minCoords The minimum coordinates of the canvas.
@@ -199,8 +308,16 @@ public class ChaosGameController {
   public void updateAffineTransformationGame(
       int steps, Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
 
-    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
-    updateChaosGame(description, steps);
+    try {
+
+      ChaosGameDescription description =
+          new ChaosGameDescription(minCoords, maxCoords, transformations);
+      updateChaosGame(description, steps);
+
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+      GuiErrorDisplay.showError("An error occurred while updating the Affine Transformation.");
+    }
 
   }
 
@@ -223,9 +340,13 @@ public class ChaosGameController {
         List<Double> currentWeights = chaosGame.getWeights();
 
         // Setting default weights if they are not set:
-        if (currentWeights == null || currentWeights.size() != description.getTransformations().size()) {
-          currentWeights = new ArrayList<>(Collections.nCopies(description.getTransformations().size(), 1.0));
+        if (currentWeights == null
+            || currentWeights.size() != description.getTransformations().size()) {
+
+          currentWeights =   // setting equal weights for all transformations
+              new ArrayList<>(Collections.nCopies(description.getTransformations().size(), 1.0));
           chaosGame.setTransformWeights(currentWeights);
+
         }
       }
 
@@ -234,6 +355,8 @@ public class ChaosGameController {
       chaosGame.runSteps(steps);
       notifyObserversAboutUpdate();
       notifyObserversAboutDescriptionChange(description);
+    } else {
+      throw new IllegalStateException(GAME_NOT_INITIALIZED);
     }
   }
 
@@ -248,14 +371,15 @@ public class ChaosGameController {
    * @param typeOfTransformation The type of transformation used.
    * @since 0.0.1
    */
-public void saveFractal(String path, String typeOfTransformation) {
-  try {                  // writing the Chaos Game to a file
-    ChaosGameFileHandler.writeToFile(chaosGame, path, typeOfTransformation);
+  public void saveFractal(String path, String typeOfTransformation) {
+    try {                  // writing the Chaos Game to a file
+      ChaosGameFileHandler.writeToFile(chaosGame, path, typeOfTransformation);
 
-  } catch (IOException e) {
-    System.err.println("Failed to save fractal: " + e.getMessage());
+    } catch (IOException e) {
+      GuiErrorDisplay.showError("I/O Error: " + e.getMessage());
+      ErrorHandler.handleException(e, LOGGER.getName());
+    }
   }
-}
 
 
 
@@ -289,9 +413,11 @@ public void saveFractal(String path, String typeOfTransformation) {
       }
 
     } catch (IOException e) {
-      System.err.println("Failed to load fractal: " + e.getMessage());
+      GuiErrorDisplay.showError("I/O Error: " + e.getMessage());
+      ErrorHandler.handleException(e, LOGGER.getName());
     } catch (IllegalArgumentException e) {
-      System.err.println("Failed to set weights: " + e.getMessage());
+      GuiErrorDisplay.showError("Invalid input: " + e.getMessage());
+      ErrorHandler.handleException(e, LOGGER.getName());
     }
   }
 
@@ -310,10 +436,13 @@ public void saveFractal(String path, String typeOfTransformation) {
    * @since 0.0.4
    */
   public ChaosGameDescription getCurrentGameDescription() {
+
     if (chaosGame != null) {
       return chaosGame.getDescription();
+
     } else {
-      throw new IllegalStateException("Chaos game has not been initialized yet.");
+      throw new IllegalStateException(GAME_NOT_INITIALIZED);
+
     }
   }
 
@@ -327,14 +456,30 @@ public void saveFractal(String path, String typeOfTransformation) {
    * @since 0.0.4
    */
   public List<AffineTransform2D> getCurrentTransformations() {
-    ChaosGameDescription description = chaosGame.getDescription();
-    if (description != null) {
-      return description.getTransformations().stream()
-          .filter(AffineTransform2D.class::isInstance)
-          .map(t -> (AffineTransform2D) t)
-          .collect(Collectors.toList());
+    try {
+
+      ChaosGameDescription description = chaosGame.getDescription();
+
+      if (description != null) {
+
+        // filtering affine transformations from the list of transformations:
+        return description.getTransformations().stream()
+            .filter(AffineTransform2D.class::isInstance)  // checking the type of transformation
+            .map(t -> (AffineTransform2D) t)     // casting to AffineTransform2D
+            .toList(); // returns a list of affine transformations
+      }
+
+      return List.of(); // returns an empty list if no description or transformations are found
+
+    } catch (Exception e) {
+
+      GuiErrorDisplay.showError(
+          "An error occurred while getting transformations: " + e.getMessage());
+      ErrorHandler.handleException(e, LOGGER.getName());
+      return List.of(); // returns an empty list if an exception occurs
+
     }
-    return List.of(); // returns an empty list if no description or transformations are found
+
   }
 
 
@@ -348,12 +493,16 @@ public void saveFractal(String path, String typeOfTransformation) {
    */
   public void setTransformWeights(List<Double> weights) {
     if (chaosGame != null) {
+
+      // weights are set only if there are affine transformations:
       if (hasAffineTransformations(chaosGame.getDescription())) {
         chaosGame.setTransformWeights(weights);
       }
+
     } else {
-      throw new IllegalStateException("Chaos game has not been initialized yet.");
+      throw new IllegalStateException(GAME_NOT_INITIALIZED);
     }
+
   }
 
 
@@ -369,9 +518,11 @@ public void saveFractal(String path, String typeOfTransformation) {
   public List<Double> getDefaultWeights(ChaosGameDescription description) {
     int size = description.getTransformations().size();  // size = the number of transformations
     List<Double> weights = new ArrayList<>();
+
     for (int i = 0; i < size; i++) {
       weights.add(1.0 / size); // setting equal weights for all transformations
     }
+
     return weights;
   }
 
@@ -386,21 +537,30 @@ public void saveFractal(String path, String typeOfTransformation) {
    * @param weights The list of weights for the transformations.
    * @since 0.0.5
    */
-  public void updateGameWithWeights(ChaosGameDescription newDescription, int steps, List<Double> weights) {
-    if (chaosGame != null) {
-      chaosGame.setDescription(newDescription);
+  public void updateGameWithWeights(ChaosGameDescription newDescription,
+      int steps, List<Double> weights) {
 
-      // only setting weights if there are affine transformations
-      if (hasAffineTransformations(newDescription)) {
-        chaosGame.setTransformWeights(weights); // setting new weights
+    if (chaosGame != null) {
+      if (newDescription.getTransformations().size() != weights.size()) {
+        throw new IllegalStateException("Number of transformations and weights do not match.");
       }
 
-      chaosGame.getCanvas().clearCanvas();
+      chaosGame.setDescription(newDescription);
+      chaosGame.setTransformWeights(weights);
+
+      chaosGame.getCanvas().clearCanvas(); // clearing the previous canvas to redraw
       chaosGame.runSteps(steps);
+
+      // notifying observers about the update and description change:
       notifyObserversAboutUpdate();
       notifyObserversAboutDescriptionChange(newDescription);
+    } else {
+      throw new IllegalStateException(GAME_NOT_INITIALIZED);
     }
   }
+
+
+
 
 
 
@@ -414,24 +574,30 @@ public void saveFractal(String path, String typeOfTransformation) {
    * @param order The order of the fractal.
    * @param cRe The real part of the complex constant.
    * @param cIm The imaginary part of the complex constant.
+   * @param maxIterations The maximum number of iterations.
    * @return The fractal point.
    * @since 0.0.6
    */
-  public int calculateFractalPoint(
-      String fractalType, double zx, double zy, int order, double cRe, double cIm) {
+  public int calculateFractalPoint(String fractalType, double zx, double zy,
+      int order, double cRe, double cIm, int maxIterations) {
+
 
     JuliaTransform transform = // creating a new JuliaTransform object
         new JuliaTransform(new Complex(cRe, cIm), 1, order, order > 2);
 
     return switch (fractalType) {
 
-      case "Julia Set Fractal" -> transform.calculateJuliaSetPoint(zx, zy, order, cRe, cIm);
+      case "Julia Set Fractal" ->
+          transform.calculateJuliaSetPoint(zx, zy, order, cRe, cIm, maxIterations);
 
-      case "Mandelbrot Set Fractal" -> transform.calculateMandelbrotSetPoint(zx, zy, order);
+      case "Mandelbrot Set Fractal" ->
+          transform.calculateMandelbrotSetPoint(zx, zy, order, maxIterations);
 
       default -> throw new IllegalArgumentException("Unknown fractal type: " + fractalType);
     };
+
   }
+
 
 
 
@@ -446,6 +612,11 @@ public void saveFractal(String path, String typeOfTransformation) {
    */
   private boolean hasAffineTransformations(ChaosGameDescription description) {
     return description.getTransformations().stream().anyMatch(AffineTransform2D.class::isInstance);
+  }
+
+
+  public void clearCanvas() {
+      chaosGame.getCanvas().clearCanvas();
   }
 
 

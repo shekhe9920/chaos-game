@@ -1,4 +1,4 @@
-package edu.ntnu.stud.idatg2003.filehandling;
+package edu.ntnu.stud.idatg2003.commonutilities.filehandling;
 
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGame;
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
@@ -41,7 +41,8 @@ public class ChaosGameFileHandler {
   /**
    * Private constructor to prevent instantiation of this utility class.
    */
-  ChaosGameFileHandler () {
+  ChaosGameFileHandler() {
+    // This constructor is intentionally empty. Nothing special is needed here.
   }
 
 
@@ -177,11 +178,16 @@ public class ChaosGameFileHandler {
           new Matrix2x2(matrixValues[0], matrixValues[1], matrixValues[2], matrixValues[3]);
 
       Vector2D vector = new Vector2D(matrixValues[4], matrixValues[5]); // Vector2D = vx, vy
-      transforms.add(new AffineTransform2D(matrix, vector)); // adding the transformation to the list
+      // adding the transformation to the list:
+      transforms.add(new AffineTransform2D(matrix, vector));
       weights.add(matrixValues[6]);  // adding the weight to the list
 
     } else {
-      throw new IOException("Incorrect number of values for Affine2D transformation on one of the lines.");
+
+      throw new IOException(
+          "Incorrect number of values for Affine2D transformation on one of the lines."
+      );
+
     }
 
   }
@@ -213,7 +219,11 @@ public class ChaosGameFileHandler {
       transforms.add(new JuliaTransform(constant, -1, order, isMultiOrder));
 
     } else {
-      throw new IOException("Incorrect number of values for Julia transformation on one of the lines.");
+
+      throw new IOException(
+          "Incorrect number of values for Julia transformation on one of the lines."
+      );
+
     }
   }
 
@@ -264,6 +274,9 @@ public class ChaosGameFileHandler {
    */
   public static void writeToFile(ChaosGame game, String path,
       String typeOfTransformation) throws IOException {
+    if (game == null) {
+      throw new NullPointerException("game cannot be null");
+    }
 
     ChaosGameDescription description = game.getDescription();
 
@@ -331,8 +344,8 @@ public class ChaosGameFileHandler {
     // iterating through the transformations and writing the values to the file:
     for (Transform2D transform : description.getTransformations()) {
       if (transform instanceof AffineTransform2D affine) {
-        Matrix2x2 matrix = affine.getMatrix();
-        Vector2D vector = affine.getVector();
+        Matrix2x2 matrix = affine.matrix();
+        Vector2D vector = affine.vector();
 
         // the number of weights should match the number of transformations:
         if (weightIndex >= weights.size()) {
@@ -341,10 +354,10 @@ public class ChaosGameFileHandler {
 
         // writing the transformation values to the file:
         writer.write(
-            matrix.getA00() + "," + matrix.getA01() + "," +  // | a00, a01 |
-                matrix.getA10() + "," + matrix.getA11() + "," +  // | a10, a11 |
-                vector.getX0() + "," + vector.getX1() + "," +    // v = [ vx, vy ]
-                weights.get(weightIndex++) + "\n");          // weight
+            matrix.a00() + "," + matrix.a01() + ","          // | a00, a01 |
+                + matrix.a10() + "," + matrix.a11() + ","        // | a10, a11 |
+                + vector.getX0() + "," + vector.getX1() + ","    // v = [ vx, vy ]
+                + weights.get(weightIndex++) + "\n");      // weight
       }
     }
   }
@@ -369,9 +382,9 @@ public class ChaosGameFileHandler {
       if (transform instanceof JuliaTransform julia) {  // if Julia transformation:
         Complex constant = julia.getPoint();            // constant for the Julia set, c = x + iy
 
-        writer.write(constant.getX0() + "," + constant.getX1() + // x, y
-            "," + julia.getOrder() + "," +     // order n (c^n)
-            julia.isMultiOrder() + "\n"); // multi-order, n > 2
+        writer.write(constant.getX0() + "," + constant.getX1()  // x, y
+            + "," + julia.getOrder() + ","    // order n (c^n)
+            + julia.isMultiOrder() + "\n"); // multi-order, n > 2
 
         written = true; // setting the flag to true
         break; // only write once as Julia sets have the same constant for both transformations

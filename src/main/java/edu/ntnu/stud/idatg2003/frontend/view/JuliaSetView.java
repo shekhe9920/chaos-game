@@ -1,6 +1,7 @@
 package edu.ntnu.stud.idatg2003.frontend.view;
 
-
+import static edu.ntnu.stud.idatg2003.commonutilities.validation.ValidationUtils.checkNotNull;
+import static edu.ntnu.stud.idatg2003.frontend.utilityfrontend.ActionHandlerUtil.setButtonAction;
 import static edu.ntnu.stud.idatg2003.frontend.utilityfrontend.FractalViewUtility.parseTextFieldToDouble;
 import static edu.ntnu.stud.idatg2003.frontend.utilityfrontend.FractalViewUtility.parseTextFieldToInt;
 import static edu.ntnu.stud.idatg2003.frontend.utilityfrontend.FractalViewUtility.showOpenFileDialog;
@@ -12,13 +13,31 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Complex;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 import edu.ntnu.stud.idatg2003.backend.transformations.JuliaTransform;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
+import edu.ntnu.stud.idatg2003.commonutilities.errorutilitie.ErrorHandler;
 import edu.ntnu.stud.idatg2003.frontend.controllers.ChaosGameController;
+import edu.ntnu.stud.idatg2003.frontend.utilityfrontend.GuiErrorDisplay;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
@@ -27,11 +46,6 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import javafx.util.Pair;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * View class for displaying and interacting with Julia and Mandelbrot set fractals.
@@ -41,14 +55,27 @@ import java.util.concurrent.Executors;
  */
 public class JuliaSetView extends FractalView {
 
+  // Logger for JuliaSetView class
+  private static final Logger LOGGER = Logger.getLogger(JuliaSetView.class.getName());
 
   private static final String JULIA_SET = "Julia Set Fractal";
   private static final String MANDELBROT_SET = "Mandelbrot Set Fractal";
 
-  private TextField cReField;
-  private TextField cImField;
-  private ComboBox<Integer> orderComboBox;
-  private ComboBox<String> fractalTypeComboBox;
+
+  // TextField elements for the Julia set fractal:
+  private TextField maxIterationsField;     // for the maximum number of iterations
+  private TextField cReField;               // for the real part of the complex number c
+  private TextField cImField;               // for the imaginary part of the complex number c
+
+
+  private ComboBox<Integer> orderComboBox;  // ComboBox for selecting the order of the Julia set
+  private ComboBox<String> fractalTypeComboBox; // ComboBox for selecting the fractal type
+
+
+  // Default description for the Julia set fractal:
+  protected static final ChaosGameDescription DEFAULT_DESCRIPTION =
+      ChaosGameDescriptionFactory.createJuliaSetDescription(
+          new Complex(-0.74543, 0.11301), 2);
 
 
 
@@ -83,7 +110,7 @@ public class JuliaSetView extends FractalView {
     minYField = new TextField("-1.0");
     maxXField = new TextField("1.6");
     maxYField = new TextField("1.0");
-    stepsField = new TextField("1000");
+    maxIterationsField = new TextField("1000");
 
     orderComboBox = new ComboBox<>();   // ComboBox for selecting the order of the Julia set
     orderComboBox.getItems().addAll(2, 3, 4);
@@ -92,6 +119,7 @@ public class JuliaSetView extends FractalView {
     fractalTypeComboBox.getItems().addAll(JULIA_SET, MANDELBROT_SET);
     fractalTypeComboBox.setValue(JULIA_SET);   // default value
   }
+
 
 
 
@@ -104,18 +132,31 @@ public class JuliaSetView extends FractalView {
    */
   @Override
   protected void drawInitialFractal(int width, int height) {
-    if (cReField == null || cImField == null) {
-      throw new IllegalStateException("UI elements are not initialized");
+    try {
+      if (cReField == null || cImField == null) {
+        throw new IllegalStateException("UI elements are not initialized");
+      }
+
+      // initializing the game and drawing the fractal:
+      controller.initializeGame(DEFAULT_DESCRIPTION, width, height, DEFAULT_STEPS);
+      drawFractal(canvas);
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+      GuiErrorDisplay.showError("Failed to draw initial fractal." + e.getMessage());
     }
+  }
 
-    // creating a Julia set description with the default complex number and order
-    ChaosGameDescription description = ChaosGameDescriptionFactory.createJuliaSetDescription(
-        new Complex(-0.74543, 0.11301), 2
-    );
 
-    // initializing the game and drawing the fractal:
-    controller.initializeGame(description, width, height, DEFAULT_STEPS);
-    drawFractal(canvas);
+
+  /**
+   * Returns the default description for the Julia set fractal.
+   *
+   * @return the default description
+   * @since 0.0.7
+   */
+  @Override
+  protected ChaosGameDescription getDefaultDescription() {
+    return DEFAULT_DESCRIPTION;
   }
 
 
@@ -128,21 +169,29 @@ public class JuliaSetView extends FractalView {
    */
   @Override
   protected void showPredefinedFractalDialog() {
-    List<Pair<String, Complex>> predefinedSets = createPredefinedSets();
+    try {
+      List<Pair<String, Complex>> predefinedSets = createPredefinedSets();
 
-    ChoiceDialog<Pair<String, Complex>> dialog = // a ChoiceDialog for predefined Julia sets
-        new ChoiceDialog<>(predefinedSets.getFirst(), predefinedSets);
+      ChoiceDialog<Pair<String, Complex>> dialog = // a ChoiceDialog for predefined Julia sets
+          new ChoiceDialog<>(predefinedSets.getFirst(), predefinedSets);
 
-    dialog.setTitle("Predefined Julia Sets");
-    dialog.setHeaderText("Select a predefined Julia Set fractal:");
-    dialog.setContentText("Available Julia Sets:");
+      dialog.setTitle("Predefined Julia Sets");
+      dialog.setHeaderText("Select a predefined Julia Set fractal:");
+      dialog.setContentText("Available Julia Sets:");
 
-    configureDialogCellFactory(dialog);  // configuring the cell factory for the dialog
+      configureDialogCellFactory(dialog);  // configuring the cell factory for the dialog
 
-    Optional<Pair<String, Complex>> result = dialog.showAndWait();
-    result.ifPresent(this::handleSelectedFractal);
-    updateFractal();
+      Optional<Pair<String, Complex>> result = dialog.showAndWait();
+      result.ifPresent(this::handleSelectedFractal);
+      updateFractal();
+
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+      GuiErrorDisplay.showError("Failed to show predefined fractal dialog." + e.getMessage());
+    }
+
   }
+
 
 
 
@@ -153,35 +202,60 @@ public class JuliaSetView extends FractalView {
    * @since 0.0.5
    */
   private List<Pair<String, Complex>> createPredefinedSets() {
-    return Arrays.asList(            // creating a list of predefined Julia Set fractals:
-        new Pair<>("Standard Julia Set (2nd Order)", new Complex(-0.4, 0.6)),
+    // creating a list of predefined Julia Set fractals:
+    return Arrays.asList(
+        new Pair<>("Standard Julia Set (2nd Order)",
+            new Complex(-0.4, 0.6)),
 
-        new Pair<>("Spider Web (2nd Order)", new Complex(0.355, 0.355)),
 
-        new Pair<>("Tricorn Julia Set (3rd Order)", new Complex(-0.5, 0.0)),
+        new Pair<>("Spider Web (2nd Order)",
+            new Complex(0.355, 0.355)),
 
-        new Pair<>("Clover Leaf (3rd Order)", new Complex(-0.54, 0.54)),
 
-        new Pair<>("Mandel bar Julia Set (4th Order)", new Complex(0.45, 0.1428)),
+        new Pair<>("Tricorn Julia Set (3rd Order)",
+            new Complex(-0.5, 0.0)),
 
-        new Pair<>("Cross Fractal (4th Order)", new Complex(-0.70176, -0.3842))
+
+        new Pair<>("Clover Leaf (3rd Order)",
+            new Complex(-0.54, 0.54)),
+
+
+        new Pair<>("Mandel bar Julia Set (4th Order)",
+            new Complex(0.45, 0.1428)),
+
+
+        new Pair<>("Cross Fractal (4th Order)",
+            new Complex(-0.70176, -0.3842))
     );
+
   }
 
 
 
 
   /**
-   * Configures the cell factory for the ChoiceDialog to display only the description of the fractal.
+   * Configures the cell factory for the ChoiceDialog to display only
+   * the description of the fractal.
    *
    * @param dialog The ChoiceDialog to configure.
    * @since 0.0.5
    */
   private void configureDialogCellFactory(ChoiceDialog<Pair<String, Complex>> dialog) {
-    ComboBox<Pair<String, Complex>> comboBox =
-        (ComboBox<Pair<String, Complex>>) dialog.getDialogPane().lookup(".combo-box");
-    comboBox.setCellFactory(createListCellFactory());
-    comboBox.setButtonCell(createListCell());
+    Node node = dialog.getDialogPane().lookup(".combo-box");
+
+    // checking if the node is a ComboBox:
+    if (node instanceof ComboBox<?>) {
+      @SuppressWarnings("unchecked")  // casting the node to a ComboBox
+
+      // casting the node to a ComboBox<Pair<String, Complex>>
+      ComboBox<Pair<String, Complex>> comboBox = (ComboBox<Pair<String, Complex>>) node;
+      comboBox.setCellFactory(createListCellFactory());
+      comboBox.setButtonCell(createListCell());
+
+    } else {
+      throw new IllegalStateException(
+          "Expected ComboBox but found " + (node != null ? node.getClass().getName() : "null"));
+    }
   }
 
 
@@ -193,15 +267,21 @@ public class JuliaSetView extends FractalView {
    * @return Callback for the ListCell factory.
    * @since 0.0.5
    */
-  private Callback<ListView<Pair<String, Complex>>, ListCell<Pair<String, Complex>>> createListCellFactory() {
+  private Callback<ListView<Pair<String, Complex>>,
+      ListCell<Pair<String, Complex>>> createListCellFactory() {
+
+    // returning a callback for the ListCell factory:
     return param -> new ListCell<>() {
       @Override
       protected void updateItem(Pair<String, Complex> item, boolean empty) {
         super.updateItem(item, empty);
-        updateListCell(this, item, empty);
+        updateListCell(this, item, empty); // updating ListCell, this = ListCell
       }
+
     };
+
   }
+
 
 
 
@@ -223,6 +303,7 @@ public class JuliaSetView extends FractalView {
 
 
 
+
   /**
    * Updates the text of the ListCell based on the given item and empty state.
    *
@@ -231,12 +312,15 @@ public class JuliaSetView extends FractalView {
    * @param empty Whether this cell represents data.
    * @since 0.0.5
    */
-  private void updateListCell(ListCell<Pair<String, Complex>> cell, Pair<String, Complex> item, boolean empty) {
+  private void updateListCell(ListCell<Pair<String, Complex>> cell,
+      Pair<String, Complex> item, boolean empty) {
+
     if (item == null || empty) {
       cell.setText(null);
     } else {
       cell.setText(item.getKey());
     }
+
   }
 
 
@@ -249,18 +333,22 @@ public class JuliaSetView extends FractalView {
    * @since 0.0.5
    */
   private void handleSelectedFractal(Pair<String, Complex> pair) {
-    int order = determineOrder(pair.getKey()); // determining the order of the fractal
-    ChaosGameDescription description =
-        ChaosGameDescriptionFactory.createJuliaSetDescription(pair.getValue(), order);
+    try {
+      int order = determineOrder(pair.getKey()); // determining the order of the fractal
+      ChaosGameDescription description =
+          ChaosGameDescriptionFactory.createJuliaSetDescription(pair.getValue(), order);
 
-    // initializing the game with the description and the canvas dimensions
-    controller.initializeGame(description, getCanvasWidth(), getCanvasHeight(), DEFAULT_STEPS);
-    loadTransformationsToUI(description);  // loading the transformations to the UI
-    loadCoordinatesToUI(description);      // loading the coordinates to the UI
+      // initializing the game with the description and the canvas dimensions
+      controller.initializeGame(description, getCanvasWidth(), getCanvasHeight(), DEFAULT_STEPS);
+      loadTransformationsToUI(description);  // loading the transformations to the UI
+      loadCoordinatesToUI(description);      // loading the coordinates to the UI
 
-    updateFractal();
+      updateFractal();
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+      GuiErrorDisplay.showError("Failed to handle selected fractal." + e.getMessage());
+    }
   }
-
 
 
 
@@ -273,11 +361,16 @@ public class JuliaSetView extends FractalView {
    * @since 0.0.5
    */
   private int determineOrder(String key) {
-    if (key.contains("4th Order")) return 4;   // checking the key string for the order
-    if (key.contains("3rd Order")) return 3;
+    // checking the key string for the order:
+    if (key.contains("4th Order")) {
+      return 4;
+    }
+    if (key.contains("3rd Order")) {
+      return 3;
+    }
+
     return 2; // default order
   }
-
 
 
 
@@ -298,12 +391,8 @@ public class JuliaSetView extends FractalView {
         cImField.setText(String.valueOf(c.getX1()));
         orderComboBox.setValue(julia.getOrder());         // setting the order of the Julia set
       }
-
     }
   }
-
-
-
 
 
 
@@ -322,27 +411,33 @@ public class JuliaSetView extends FractalView {
     openConfig.setOnAction(e -> {
       File file = showOpenFileDialog(getScene().getWindow()); // showing the file dialog
       if (file != null) {
-        controller.loadFractal(file.getPath());
-        ChaosGameDescription description = controller.getCurrentGameDescription();
-        System.out.println("Current game description after loading: " + description);
+        try {
+          controller.loadFractal(file.getPath());
+          ChaosGameDescription description = controller.getCurrentGameDescription();
+          System.out.println("Current game description after loading: " + description);
 
-        if (description != null) {
-          updateUIWithDescription(description); // updating the UI with the description
-          loadTransformationsToUI(description);
-          loadCoordinatesToUI(description);
-          // initializing the game with the description:
-          controller.initializeGame(description, getCanvasWidth(), getCanvasHeight(), DEFAULT_STEPS);
-          drawFractal(canvas); // drawing the fractal
+          if (description != null) {
+            updateUIWithDescription(description); // updating the UI with the description
+            loadTransformationsToUI(description);
+            loadCoordinatesToUI(description);
+            // initializing the game with the description:
+            controller.initializeGame(
+                description, getCanvasWidth(), getCanvasHeight(), DEFAULT_STEPS
+            );
+
+
+            drawFractal(canvas); // drawing the fractal
+          }
+
+        } catch (Exception ex) {
+          ErrorHandler.handleException(ex, LOGGER.getName());
+          GuiErrorDisplay.showError("Failed to load fractal from file." + ex.getMessage());
         }
-
       }
     });
 
     return openConfig;
   }
-
-
-
 
 
 
@@ -356,12 +451,12 @@ public class JuliaSetView extends FractalView {
   @Override
   protected MenuItem createSaveConfigMenuItem() {
     MenuItem saveConfig = new MenuItem("Save Fractal To File");
+
     // setting the action for the menu item:
     saveConfig.setOnAction(e -> {
       File file = showSaveFileDialog(getScene().getWindow());
       if (file != null) {
-
-        try { // saving the fractal to the file
+        try {
           ChaosGameDescription currentDescription = controller.getCurrentGameDescription();
 
           currentDescription.setMinCoords(
@@ -373,16 +468,15 @@ public class JuliaSetView extends FractalView {
           controller.saveFractal(file.getPath(), "Julia");
           updateFractal();
 
-        } catch (NumberFormatException ex) {
-          System.err.println("Error parsing number: " + ex.getMessage());
+        } catch (Exception ex) {
+          ErrorHandler.handleException(ex, LOGGER.getName());
+          GuiErrorDisplay.showError("Failed to save fractal to file." + ex.getMessage());
         }
       }
-
     });
 
     return saveConfig;
   }
-
 
 
 
@@ -394,12 +488,14 @@ public class JuliaSetView extends FractalView {
    */
   @Override
   protected void setupSettingsPane() {
-    settingsPane = createFractalOptionsPane();             // creating the fractal options pane
-    ScrollPane scrollPane = new ScrollPane(settingsPane);  // creating a scroll pane for the settings
-    scrollPane.setPrefHeight(settingsPane.getHeight());    // preferred height of the scroll pane
-    scrollPane.prefWidth(settingsPane.getWidth());         // preferred width of the scroll pane
-    setRight(scrollPane);                      // setting the scroll pane to the right side
+    settingsPane = createFractalOptionsPane();             // the fractal options pane
+    ScrollPane scrollPane = new ScrollPane(settingsPane);  // a scroll pane for the settings
+    scrollPane.setPrefHeight(settingsPane.getHeight());    // height of the scroll pane
+    scrollPane.prefWidth(settingsPane.getWidth());         // width of the scroll pane
+    setRight(scrollPane);                      // the scroll pane to the right side
   }
+
+
 
 
   /**
@@ -414,7 +510,7 @@ public class JuliaSetView extends FractalView {
 
     // checking if the UI elements are initialized
     checkNotNull(cReField, cImField, minXField, minYField,
-        maxXField, maxYField, stepsField, orderComboBox, fractalTypeComboBox
+        maxXField, maxYField, maxIterationsField, orderComboBox, fractalTypeComboBox
     );
 
     // creating the UI elements for the fractal settings
@@ -427,20 +523,17 @@ public class JuliaSetView extends FractalView {
     HBox maxCoordsBox = new HBox(5, new Label("Max X:"), maxXField,
         new Label("Max Y:"), maxYField);
 
-    HBox stepsBox = new HBox(5, new Label("Steps:"), stepsField);
+    HBox maxIterationsBox = new HBox(5, new Label("Max Iterations:"), maxIterationsField);
     HBox orderBox = new HBox(5, new Label("Order:"), orderComboBox);
     HBox fractalTypeBox = new HBox(5, new Label("Fractal Type:"), fractalTypeComboBox);
 
     // creating buttons for updating the fractal and showing predefined Julia sets:
     Button updateFractalButton = new Button("Update Fractal");
-    updateFractalButton.setOnAction(e -> {
-      System.out.println("Update button pressed");
-      updateFractal();
-    });
+    setButtonAction(updateFractalButton, this::updateFractal);
 
-
+    // creating a button for showing predefined Julia sets:
     Button showPredefinedJuliaSetsButton = new Button("Show Predefined Julia Sets");
-    showPredefinedJuliaSetsButton.setOnAction(e -> showPredefinedFractalDialog());
+    setButtonAction(showPredefinedJuliaSetsButton, this::showPredefinedFractalDialog);
 
     // adding the UI elements to the settings box
     settingsBox.getChildren().addAll(
@@ -449,7 +542,7 @@ public class JuliaSetView extends FractalView {
         fractalTypeBox,
         minCoordsBox,
         maxCoordsBox,
-        stepsBox,
+        maxIterationsBox,
         updateFractalButton,
         showPredefinedJuliaSetsButton
     );
@@ -458,6 +551,7 @@ public class JuliaSetView extends FractalView {
     settingsPane.setCollapsible(true);  // setting the TitledPane to be collapsible
     return settingsPane; // returning the TitledPane
   }
+
 
 
 
@@ -477,6 +571,8 @@ public class JuliaSetView extends FractalView {
 
 
 
+
+
   /**
    * Updates the fractal with the current settings.
    *
@@ -487,35 +583,44 @@ public class JuliaSetView extends FractalView {
     try {
       double realPart = parseTextFieldToDouble(cReField);    // parsing the text fields to double
       double imaginaryPart = parseTextFieldToDouble(cImField);
-      int steps = parseTextFieldToInt(stepsField);
+      // Using maxIterations instead of steps:
+      int maxIterations = parseTextFieldToInt(maxIterationsField);
 
       int order = getSelectedOrder();    // getting the selected order of the fractal
       String fractalType = getSelectedFractalType();  // getting the selected fractal type
 
       // creating a complex number with the real and imaginary parts, and min and max coordinates
       Complex c = new Complex(realPart, imaginaryPart);
-      Vector2D minCoords = new Vector2D(parseTextFieldToDouble(minXField), parseTextFieldToDouble(minYField));
-      Vector2D maxCoords = new Vector2D(parseTextFieldToDouble(maxXField), parseTextFieldToDouble(maxYField));
+      Vector2D minCoords = new Vector2D(parseTextFieldToDouble(minXField),
+          parseTextFieldToDouble(minYField));
+      Vector2D maxCoords = new Vector2D(parseTextFieldToDouble(maxXField),
+          parseTextFieldToDouble(maxYField));
       ChaosGameDescription description; // creating a ChaosGameDescription object
+
+
 
       if (fractalType.equals(JULIA_SET)) { // creating a Julia set description
         description = ChaosGameDescriptionFactory.createJuliaSetDescription(c, order);
         description.setMinCoords(minCoords);            // setting the min and max coordinates-
         description.setMaxCoords(maxCoords);            // for the Julia set description
 
-        controller.updateJuliaSetGame(steps, minCoords, maxCoords, c, order); // updating the game
+        controller.updateJuliaSetGame(maxIterations, minCoords, maxCoords, c, order);
 
         // initializing the game with the description and the canvas dimensions
-        controller.initializeGame(description, getCanvasWidth(), getCanvasHeight(), steps);
+        controller.initializeGame(description, getCanvasWidth(), getCanvasHeight(), maxIterations);
+
 
       } else {  // creating a Mandelbrot set description
-        description = ChaosGameDescriptionFactory.createMandelbrotSetDescription(order);
-        controller.initializeGame(description, getCanvasWidth(), getCanvasHeight(), steps);
+        description = ChaosGameDescriptionFactory.createMandelbrotSetDescription();
+        description.setMinCoords(minCoords);            // setting the min and max coordinates-
+        description.setMaxCoords(maxCoords);            // for the Mandelbrot set description
+        controller.initializeGame(description, getCanvasWidth(), getCanvasHeight(), maxIterations);
       }
 
       drawFractal(canvas);
-    } catch (NumberFormatException e) {
-      System.err.println("Error parsing input: " + e.getMessage());
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+      GuiErrorDisplay.showError("Failed to update fractal." + e.getMessage());
     }
   }
 
@@ -525,10 +630,7 @@ public class JuliaSetView extends FractalView {
 
 
 
-
-
-
-
+  //###################### Drawing Logic For Julia Set Fractal ######################
 
   /**
    * Draws the fractal on the canvas.
@@ -537,29 +639,49 @@ public class JuliaSetView extends FractalView {
    * @since 0.0.5
    */
   protected void drawFractal(Canvas canvas) {
-    int width = (int) canvas.getWidth();  // getting the width and height of the canvas
-    int height = (int) canvas.getHeight();
-    int order = getSelectedOrder();  // getting the selected order
-    int maxIteration = 1000;  // maximum number of iterations for the fractal calculation
-
-    WritableImage image = new WritableImage(width, height); // WritableImage for drawing pixels
-
-    PixelWriter pixelWriter = image.getPixelWriter(); // PixelWriter for setting pixel colors
-
-    ExecutorService executor =    // ExecutorService for parallelizing row drawing
+    // creating an ExecutorService for drawing the fractal
+    ExecutorService executor =
         Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    // submitting tasks for drawing each row of the fractal
-    for (int y = 0; y < height; y++) {
-      int finalY1 = y;
-      executor.submit(() ->
-          drawRow(finalY1, width, height, order, maxIteration, pixelWriter));
+    try {
+      int width = (int) canvas.getWidth();  // getting the width and height of the canvas
+      int height = (int) canvas.getHeight();
+      int order = getSelectedOrder();  // getting the selected order
+      // maximum number of iterations for the fractal calculation:
+      int maxIterations = parseTextFieldToInt(maxIterationsField);
+
+      WritableImage image = new WritableImage(width, height); // WritableImage for drawing pixels
+
+      PixelWriter pixelWriter = image.getPixelWriter(); // PixelWriter for setting pixel colors
+
+      // submitting tasks for drawing each row of the fractal
+      for (int y = 0; y < height; y++) {
+        int finalY1 = y;
+        executor.submit(() -> drawRow(finalY1, width, height, order, maxIterations, pixelWriter));
+      }
+
+      shutdownExecutorAndAwaitTermination(executor); // shutting down the executor
+
+      GraphicsContext gc = canvas.getGraphicsContext2D(); // getting the GraphicsContext
+      gc.drawImage(image, 0, 0); // drawing the image on the canvas
+
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+    } finally {
+      executor.shutdown();
+
+      try { // shutting down the executor
+        if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+          System.err.println("Executor did not terminate in the specified time.");
+          List<Runnable> droppedTasks = executor.shutdownNow();
+          System.err.println("Executor was abruptly shut down. "
+              + droppedTasks.size() + " tasks will not be executed.");
+        }
+      } catch (InterruptedException e) { // handling the InterruptedException
+        executor.shutdownNow();
+        Thread.currentThread().interrupt();
+      }
     }
-
-    shutdownExecutorAndAwaitTermination(executor); // shutting down the executor
-
-    GraphicsContext gc = canvas.getGraphicsContext2D(); // getting the GraphicsContext
-    gc.drawImage(image, 0, 0); // drawing the image on the canvas
   }
 
 
@@ -575,26 +697,32 @@ public class JuliaSetView extends FractalView {
    * @param pixelWriter   The PixelWriter to set the color of pixels in the WritableImage.
    * @since 0.0.5
    */
-  private void drawRow(int y, int width, int height, int order, int maxIteration, PixelWriter pixelWriter) {
-    double minX = parseTextFieldToDouble(minXField); // parsing the text fields to double
-    double minY = parseTextFieldToDouble(minYField);
-    double maxX = parseTextFieldToDouble(maxXField);
-    double maxY = parseTextFieldToDouble(maxYField);
-    String fractalType = getSelectedFractalType();   // getting the selected fractal type
+  private void drawRow(
+      int y, int width, int height, int order, int maxIterations, PixelWriter pixelWriter) {
 
+    try {
+      double minX = parseTextFieldToDouble(minXField); // parsing the text fields to double
+      double minY = parseTextFieldToDouble(minYField);
+      double maxX = parseTextFieldToDouble(maxXField);
+      double maxY = parseTextFieldToDouble(maxYField);
+      String fractalType = getSelectedFractalType();   // getting the selected fractal type
 
-    // iterating through the width of the canvas
-    for (int x = 0; x < width; x++) {
+      // iterating through the width of the canvas
+      for (int x = 0; x < width; x++) {
+        double zx = minX + x * (maxX - minX) / width;     // calculating the x and y coordinates
+        double zy = minY + y * (maxY - minY) / height;   // in the fractal coordinate system
+        // calculating the iteration and smooth iteration.
+        int iteration =
+            calculateIteration(zx, zy, fractalType, order, maxIterations);
+        double smoothIteration = calculateSmoothIteration(iteration, zx, zy, maxIterations);
+        Color color = calculateColor(smoothIteration, iteration, maxIterations);
 
-      double zx = minX + x * (maxX - minX) / width;     // calculating the x and y coordinates
-      double zy = minY + y * (maxY - minY) / height;   // in the fractal coordinate system
-      // calculating the iteration and smooth iteration.
-      int iteration = calculateIteration(zx, zy, fractalType, order);
-      double smoothIteration = calculateSmoothIteration(iteration, zx, zy, maxIteration);
-      Color color = calculateColor(smoothIteration, iteration, maxIteration);
-
-      pixelWriter.setColor(x, y, color); // setting the color of the pixel
+        pixelWriter.setColor(x, y, color); // setting the color of the pixel
+      }
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
     }
+
   }
 
 
@@ -619,15 +747,26 @@ public class JuliaSetView extends FractalView {
    * @param order        The order of the fractal.
    * @return             The number of iterations before the point escapes the fractal boundary.
    */
-  private int calculateIteration(double zx, double zy, String fractalType, int order) {
-    if (fractalType.equals(JULIA_SET)) {  // calculating the fractal point based on the fractal type
-      double cRe = parseTextFieldToDouble(cReField);
-      double cIm = parseTextFieldToDouble(cImField);
-      return controller.calculateFractalPoint(JULIA_SET, zx, zy, order, cRe, cIm);
+  private int calculateIteration(
+      double zx, double zy, String fractalType, int order, int maxIterations) {
 
-    } else { // calculating the fractal point for the Mandelbrot set
-      return controller.calculateFractalPoint(MANDELBROT_SET, zx, zy, order, 0, 0);
+    try {
+      // calculating the fractal point based on the fractal type:
+      if (fractalType.equals(JULIA_SET)) {
+
+        double cRe = parseTextFieldToDouble(cReField);
+        double cIm = parseTextFieldToDouble(cImField);
+        return controller.calculateFractalPoint(JULIA_SET, zx, zy, order, cRe, cIm, maxIterations);
+
+      } else { // calculating the fractal point for the Mandelbrot set
+        return controller.calculateFractalPoint(
+            MANDELBROT_SET, zx, zy, order, 0, 0, maxIterations);
+      }
+    } catch (Exception e) {
+      ErrorHandler.handleException(e, LOGGER.getName());
+      return 0;
     }
+
   }
 
 
@@ -648,22 +787,17 @@ public class JuliaSetView extends FractalView {
    * @param iteration    The raw iteration count.
    * @param zx           The x-coordinate value in the fractal coordinate system.
    * @param zy           The y-coordinate value in the fractal coordinate system.
-   * @param maxIteration The maximum number of iterations.
+   * @param maxIterations The maximum number of iterations.
    * @return             The smooth iteration count for color smoothing.
    */
-  private double calculateSmoothIteration(int iteration, double zx, double zy, int maxIteration) {
-
-    if (iteration < maxIteration) {
+  private double calculateSmoothIteration(int iteration, double zx, double zy, int maxIterations) {
+    if (iteration < maxIterations) {
       double absZ = Math.sqrt(zx * zx + zy * zy); // |z| = sqrt(x^2 + y^2)
-
       if (absZ > 0) {  // |z| > 0
         double logAbsZ = Math.log(absZ);  // log(|z|) = log(sqrt(x^2 + y^2))
-
         if (logAbsZ > 0) {  // log(|z|) > 0
-
           double logLogAbsZ = Math.log(logAbsZ);  // log(log(|z|))
           if (logLogAbsZ > 0) {    // log(log(|z|)) > 0
-
             // iteration + 1 - log(log(|z|)) / log(2)
             return iteration + 1 - logLogAbsZ / Math.log(2);
           }
@@ -672,6 +806,7 @@ public class JuliaSetView extends FractalView {
     }
     return iteration;
   }
+
 
 
 
@@ -686,23 +821,24 @@ public class JuliaSetView extends FractalView {
    * The saturation is set to 1.0.
    * The brightness is calculated as:
    * <pre>
-   * brightness = iteration < maxIteration ? 1.0 - Math.sqrt(iteration / (double) maxIteration) : 0.0
+   * brightness= iteration < maxIteration ? 1.0 - Math.sqrt(iteration / (double) maxIteration) : 0.0
    * </pre>
    *
    * @param smoothIteration The smooth iteration count for color smoothing.
    * @param iteration       The raw iteration count.
-   * @param maxIteration    The maximum number of iterations.
+   * @param maxIterations    The maximum number of iterations.
    * @return                The Color of the pixel.
    */
-  private Color calculateColor(double smoothIteration, int iteration, int maxIteration) {
+  private Color calculateColor(double smoothIteration, int iteration, int maxIterations) {
     double hue = 360.0 * (smoothIteration % 256) / 256.0;    // hue calculation
     double saturation = 1.0;   // saturation is set to 1.0
 
     double brightness =        // brightness calculation
-        iteration < maxIteration ? 1.0 - Math.sqrt(iteration / (double) maxIteration) : 0.0;
+        iteration < maxIterations ? 1.0 - Math.sqrt(iteration / (double) maxIterations) : 0.0;
 
     return Color.hsb(hue, saturation, brightness);  // returning the color
   }
+
 
 
 
@@ -712,13 +848,21 @@ public class JuliaSetView extends FractalView {
    * This method ensures that all threads complete their execution before the application continues.
    *
    * @param executor The ExecutorService to shut down.
+   * @since 0.0.5
    */
   private void shutdownExecutorAndAwaitTermination(ExecutorService executor) {
-    executor.shutdown();
     try {
-      executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+      executor.shutdown();
+      if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+        executor.shutdownNow();
+        if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)) {
+          System.err.println("Executor did not terminate");
+          GuiErrorDisplay.showError("Executor did not terminate");
+        }
+      }
+    } catch (InterruptedException ie) {
+      executor.shutdownNow();    // (Re-)Cancel if current thread also interrupted
+      Thread.currentThread().interrupt(); // preserve interrupt status
     }
   }
 
@@ -726,8 +870,9 @@ public class JuliaSetView extends FractalView {
 
 
   /**
-   * Shows a dialog for editing the transformation weights.
+   * Gets the selected order from the ComboBox.
    *
+   * @return The selected order.
    * @since 0.0.5
    */
   private int getSelectedOrder() {
@@ -736,14 +881,14 @@ public class JuliaSetView extends FractalView {
 
 
 
+
   /**
-   * Shows a dialog for editing the transformation weights.
+   * Gets the selected fractal type from the ComboBox.
    *
+   * @return The selected fractal type.
    * @since 0.0.5
    */
   private String getSelectedFractalType() {
     return fractalTypeComboBox.getValue();
   }
-
-
 }

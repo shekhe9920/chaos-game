@@ -24,16 +24,28 @@ public class WeightedRandomSampler {
    * The weights are accumulated to form a list of cumulative weights.
    *
    * @param weights the list of weights
+   * @throws IllegalArgumentException if any weight is negative
+   * @throws IllegalStateException if the list of weights is empty
    * @since 0.0.1
    */
   public WeightedRandomSampler(List<Double> weights) {
+    // list of cumulative weights:
     this.cumulativeWeights = new ArrayList<>();
-    double cumulativeSum = 0.0;
-    for (double weight : weights) {          // Iterate over weights
-      cumulativeSum += weight;               // Add the current weight to the cumulative sum
-      cumulativeWeights.add(cumulativeSum);  // Add the cumulative sum to the list
+    double cumulativeSum = 0.0; // initial sum of weights
+
+    // Iterate over weights:
+    for (double weight : weights) {
+
+      if (weight < 0) {
+        throw new IllegalArgumentException("Weights must be non-negative");
+      }
+
+      cumulativeSum += weight;               // Adding the current weight to the running total
+      cumulativeWeights.add(cumulativeSum);  // Adding the running total to the list
     }
-    this.random = new Random();
+
+
+    this.random = new Random(); // this random number generator is used for selecting weights
   }
 
 
@@ -50,13 +62,16 @@ public class WeightedRandomSampler {
     if (cumulativeWeights.isEmpty()) {
       throw new IllegalStateException("The list of weights is empty.");
     }
+
     double randomValue = random.nextDouble() * cumulativeWeights.getLast();
-    for (int i = 0; i < cumulativeWeights.size(); i++) {      // Iterate over cumulative weights
+
+    // Iterate over cumulative weights:
+    for (int i = 0; i < cumulativeWeights.size(); i++) {
       if (randomValue < cumulativeWeights.get(i)) {
-        return i;  // Return the index of the first cumulative weight greater than the random value
+        return i;  // the index of the first total weight greater than the random value
       }
     }
-    return -1; // This should never happen if weights are set correctly
+    return -1; // this should never happen if weights are set correctly
   }
 
 

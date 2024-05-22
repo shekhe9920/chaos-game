@@ -6,7 +6,8 @@ package edu.ntnu.stud.idatg2003.backend.mathoperations;
  * The {@code real} and {@code imaginary} parts represent the components of the complex number.
  *
  * <p>
- * A complex number is represented as z = a + bi, where a is the real part and b is the imaginary part.
+ * A complex number is represented as z = a + bi,
+ * where a is the real part and b is the imaginary part.
  * </p>
  *
  * @version 0.0.3
@@ -41,7 +42,6 @@ public class Complex extends Vector2D {
    * The multiplication of two complex numbers (a + bi) and (c + di) is given by:
    * <br>
    * (a + bi) * (c + di) = (ac - bd) + (ad + bc)i
-   * </br>
    * </p>
    *
    * @param other The complex number to multiply with.
@@ -74,7 +74,6 @@ public class Complex extends Vector2D {
    * The square root is then given by:
    * <br>
    * sqrt(z) = sqrt(r) * (cos(theta / 2) + i * sin(theta / 2))
-   * </br>
    * </p>
    *
    * @return The result of the square root as a new {@code Complex} number.
@@ -86,7 +85,8 @@ public class Complex extends Vector2D {
     double magnitude = Math.sqrt(real * real + imag * imag); // r = sqrt(a^2 + b^2)
     double angle = Math.atan2(imag, real) / 2.0;  // theta / 2
 
-    return new Complex( // Return the square root as a new complex number
+    // Return the square root as a new complex number:
+    return new Complex(
         Math.sqrt(magnitude) * Math.cos(angle),  // sqrt(r) * cos(theta / 2)
         Math.sqrt(magnitude) * Math.sin(angle)   // sqrt(r) * sin(theta / 2)
     );
@@ -106,20 +106,19 @@ public class Complex extends Vector2D {
    * The subtraction of two complex numbers (a + bi) and (c + di) is given by:
    * <br>
    * (a + bi) - (c + di) = (a - c) + (b - d)i
-   * </br>
    * </p>
    *
    * @param otherVector The vector to subtract from this complex number.
+   * @throws IllegalArgumentException If the other vector is null.
    * @return A new complex number representing the result of the subtraction.
    * @since 0.0.2
    */
   @Override
-  public Complex subtract(Vector2D otherVector) { // Return type changed to Complex
-    if (otherVector instanceof Complex) {
-      return new Complex(
-          this.x0 - otherVector.x0, this.x1 - otherVector.x1);
+  public Complex subtract(Vector2D otherVector) {
+    if (otherVector == null) {
+      throw new IllegalArgumentException("Other vector cannot be null");
     }
-    return new Complex(this.x0 - otherVector.x0, this.x1 - otherVector.x1); // Ensure it returns Complex
+    return new Complex(this.x0 - otherVector.x0, this.x1 - otherVector.x1);
   }
 
 
@@ -136,7 +135,6 @@ public class Complex extends Vector2D {
    * The power is then given by:
    * <br>
    * z^n = r^n * (cos(n * theta) + i * sin(n * theta))
-   * </br>
    * </p>
    *
    * @param exponent The exponent to raise this complex number to.
@@ -149,7 +147,8 @@ public class Complex extends Vector2D {
     double magnitude = Math.pow(Math.sqrt(real * real + imag * imag), exponent); // r^n
     double angle = Math.atan2(imag, real) * exponent;  // n * theta
 
-    return new Complex( // Return the power as a new complex number
+    // Return the power as a new complex number
+    return new Complex(
         magnitude * Math.cos(angle),  // r^n * cos(n * theta)
         magnitude * Math.sin(angle)   // r^n * sin(n * theta)
     );
@@ -166,7 +165,6 @@ public class Complex extends Vector2D {
    * The magnitude of a complex number z = a + bi is given by:
    * <br>
    * |z| = sqrt(a^2 + b^2)
-   * </br>
    * </p>
    *
    * @return The size of this complex number.
@@ -181,16 +179,15 @@ public class Complex extends Vector2D {
 
 
   /**
-   * Calculates the magnitude of this complex number.
+   * Calculates the size of this complex number.
    *
    * <p>
    * The magnitude of a complex number z = a + bi is given by:
    * <br>
    * |z| = sqrt(a^2 + b^2)
-   * </br>
    * </p>
    *
-   * @return The magnitude of this complex number.
+   * @return The size of this complex number.
    * @since 0.0.3
    */
   public double magnitude() {
@@ -208,7 +205,6 @@ public class Complex extends Vector2D {
    * The angle of a complex number z = a + bi is given by:
    * <br>
    * arg(z) = atan2(b, a)
-   * </br>
    * </p>
    *
    * @return The angle of this complex number in radians.

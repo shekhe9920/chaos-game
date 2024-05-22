@@ -4,8 +4,8 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Matrix2x2;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 
 /**
- * The {@code AffineTransform2D} class represents an Affine transformation in the form of
- * x -> Ax + b, where A is a 2x2 matrix, and b is a 2-dimensional vector.
+ * The {@code AffineTransform2D} record class represents an Affine transformation in the form
+ * of 'x -> Ax + b', where A is a 2x2 matrix, and b is a 2-dimensional vector.
  * It implements the {@code Transform2D} interface.
  *
  * <p>
@@ -13,25 +13,22 @@ import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
  * <pre>
  * x' = Ax + b
  * </pre>
- * where x is the original vector, x' is the transformed vector, A is a 2x2 matrix representing linear transformation, and b is a 2D vector representing translation.
+ * where x is the original vector, x' is the transformed vector, A is a 2x2 matrix representing
+ * linear transformation, and b is a 2D vector representing translation.
  * </p>
  *
- * @version 0.0.2
+ * @param matrix a 2x2 matrix, representing the linear transformation.
+ * @param vector a 2-dimensional vector, representing the translation.
+ * @version 0.0.3
  * @since 0.0.0 (The version of Chaos-Game application when introduced)
  */
-public class AffineTransform2D implements Transform2D {
-
-
-
-  private Matrix2x2 matrix; // a 2x2 matrix, representing the linear transformation.
-  private Vector2D vector; // a 2-dimensional vector, representing the translation.
-
-
+public record AffineTransform2D(Matrix2x2 matrix, Vector2D vector) implements Transform2D {
 
 
   /**
-   * The constructor for the {@code AffineTransform2D} class. It takes a 2x2 matrix and
-   * a 2-dimensional vector as input and constructs a new {@code AffineTransform2D} object.
+   * The constructor for the {@code AffineTransform2D} class.
+   * It takes a 2x2 matrix and a 2-dimensional vector as input
+   * and constructs a new {@code AffineTransform2D} object.
    * If either the matrix or vector is null, an exception is thrown.
    *
    * @param matrix The 2x2 matrix.
@@ -39,15 +36,11 @@ public class AffineTransform2D implements Transform2D {
    * @throws IllegalArgumentException If either the matrix or vector is null.
    * @since 0.0.0
    */
-  public AffineTransform2D(Matrix2x2 matrix, Vector2D vector) {
+  public AffineTransform2D {
     if (matrix == null || vector == null) {
       throw new IllegalArgumentException("The matrix and vector cannot be null");
     }
-    this.matrix = matrix;
-    this.vector = vector;
   }
-
-
 
 
   /**
@@ -62,28 +55,5 @@ public class AffineTransform2D implements Transform2D {
     return matrix.multiply(point).add(vector);
   }
 
-
-
-  /**
-   * Gets the matrix of the affine transformation.
-   *
-   * @return The matrix.
-   * @since 0.0.1
-   */
-  public Matrix2x2 getMatrix() {
-    return matrix;
-  }
-
-
-
-  /**
-   * Gets the vector of the affine transformation.
-   *
-   * @return The vector.
-   * @since 0.0.1
-   */
-  public Vector2D getVector() {
-    return vector;
-  }
 
 }

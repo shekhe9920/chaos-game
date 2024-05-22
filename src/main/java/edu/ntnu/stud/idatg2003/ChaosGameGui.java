@@ -16,7 +16,7 @@ import javafx.stage.WindowEvent;
  * @version 0.0.5
  * @since 0.0.2 (The version of Chaos-Game application when introduced)
  */
-public class ChaosGameGUI extends Application {
+public class ChaosGameGui extends Application {
 
 
 
