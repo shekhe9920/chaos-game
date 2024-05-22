@@ -79,10 +79,6 @@ public class ChaosCanvas {
     Vector2D translationVector =
         new Vector2D(-minCoords.getX0() * scaleX, -minCoords.getX1() * scaleY);
 
-    System.out.println("ScaleX: " + scaleX + ", ScaleY: " + scaleY);
-    System.out.println("Translation Vector: " + translationVector.getX0() + ", " + translationVector.getX1());
-
-
     // Creating the AffineTransform2D with the matrix and vector:
     this.transformCoordsToIndices = new AffineTransform2D(scaleMatrix, translationVector);
   }
@@ -100,12 +96,12 @@ public class ChaosCanvas {
    * @throws IndexOutOfBoundsException If the transformed point is outside the canvas bounds.
    * @since 0.0.3
    */
-  private Vector2D transformToCanvasIndices(Vector2D point) {
+  Vector2D transformToCanvasIndices(Vector2D point) {
     Vector2D canvasPoint = transformCoordsToIndices.transform(point); // Transforming the point
     // Clamping to canvas bounds:
-    int xIndex = (int) Math.min(Math.max(0, canvasPoint.getX0()), width - 1);
-    int yIndex = (int) Math.min(Math.max(0, canvasPoint.getX1()), height - 1);
-    return new Vector2D(xIndex, yIndex); // Returning the transformed point
+    int x0Index = (int) Math.min(Math.max(0, canvasPoint.getX0()), (double) width - 1);
+    int x1Index = (int) Math.min(Math.max(0, canvasPoint.getX1()), (double) height - 1);
+    return new Vector2D(x0Index, x1Index); // Returning the transformed point
   }
 
 
@@ -138,12 +134,17 @@ public class ChaosCanvas {
    * @since 0.0.1
    */
   public void putPixel(Vector2D point, int color) {
+    if (point.getX0() < minCoords.getX0() || point.getX0() > maxCoords.getX0() ||
+        point.getX1() < minCoords.getX1() || point.getX1() > maxCoords.getX1()) {
+      return; // return, if the point is out of bounds
+    }
+
     Vector2D canvasPoint = transformToCanvasIndices(point);  // Transforming to canvas indices
-    int xIndex = (int) canvasPoint.getX0();  // Getting the x index
-    int yIndex = (int) canvasPoint.getX1();  // Getting the y index
-    if (xIndex >= 0 && xIndex < width && yIndex >= 0 && yIndex < height) {
-      canvas[yIndex][xIndex] = color;  // Setting the color at the transformed location
-      hitCounts[yIndex][xIndex]++;     // Incrementing the hit count for the pixel
+    int x0Index = (int) canvasPoint.getX0();  // Getting the x index
+    int x1Index = (int) canvasPoint.getX1();  // Getting the y index
+    if (x0Index >= 0 && x0Index < width && x1Index >= 0 && x1Index < height) {
+      canvas[x1Index][x0Index] = color;  // Setting the color at the transformed location
+      hitCounts[x1Index][x0Index]++;     // Incrementing the hit count for the pixel
     }
   }
 
@@ -178,6 +179,15 @@ public class ChaosCanvas {
     return canvas;
   }
 
+
+
+  public int getWidth() {
+    return width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
 
 
 

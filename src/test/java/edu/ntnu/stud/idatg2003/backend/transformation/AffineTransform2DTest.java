@@ -18,6 +18,10 @@ class AffineTransform2DTest {
 
 
 
+  /**
+   * Test that checks if the constructor of the AffineTransform2D class throws
+   * an IllegalArgumentException when the matrix is null.
+   */
   @Test
   void constructor_NullMatrix_ShouldThrowException() {
     Vector2D vector = new Vector2D(1, 1);
@@ -28,6 +32,10 @@ class AffineTransform2DTest {
 
 
 
+  /**
+   * Test that checks if the constructor of the AffineTransform2D class throws
+   * an IllegalArgumentException when the vector is null.
+   */
   @Test
   void constructor_NullVector_ShouldThrowException() {
     Matrix2x2 matrix = new Matrix2x2(1, 0, 0, 1);
@@ -38,6 +46,10 @@ class AffineTransform2DTest {
 
 
 
+  /**
+   * Test that checks if the transform method of the AffineTransform2D class returns
+   * the correct result when given a valid point.
+   */
   @Test
   void transform_ValidPoint_ShouldReturnCorrectResult() {
     // Setup a transformation that scales by 2 and translates by (1, 1):
@@ -57,31 +69,39 @@ class AffineTransform2DTest {
 
 
 
+  /**
+   * Test that checks if {@code getMatrix} method of the AffineTransform2D class returns
+   * the correct matrix.
+   */
   @Test
   void getMatrix_ShouldReturnCorrectMatrix() {
     Matrix2x2 matrix = new Matrix2x2(1, 2, 3, 4);
     Vector2D vector = new Vector2D(5, 6);
     AffineTransform2D transform = new AffineTransform2D(matrix, vector);
 
-    Matrix2x2 resultMatrix = transform.getMatrix();
+    Matrix2x2 resultMatrix = transform.matrix();
 
     Assertions.assertNotNull(resultMatrix, "getMatrix should not return null.");
-    Assertions.assertEquals(matrix.getA00(), resultMatrix.getA00(), "Matrix elements should match.");
-    Assertions.assertEquals(matrix.getA01(), resultMatrix.getA01(), "Matrix elements should match.");
-    Assertions.assertEquals(matrix.getA10(), resultMatrix.getA10(), "Matrix elements should match.");
-    Assertions.assertEquals(matrix.getA11(), resultMatrix.getA11(), "Matrix elements should match.");
+    Assertions.assertEquals(matrix.a00(), resultMatrix.a00(), "Matrix elements should match.");
+    Assertions.assertEquals(matrix.a01(), resultMatrix.a01(), "Matrix elements should match.");
+    Assertions.assertEquals(matrix.a10(), resultMatrix.a10(), "Matrix elements should match.");
+    Assertions.assertEquals(matrix.a11(), resultMatrix.a11(), "Matrix elements should match.");
   }
 
 
 
 
+  /**
+   * Test that checks if {@code getVector} method of the AffineTransform2D class returns
+   * the correct vector.
+   */
   @Test
   void getVector_ShouldReturnCorrectVector() {
     Matrix2x2 matrix = new Matrix2x2(1, 2, 3, 4);
     Vector2D vector = new Vector2D(5, 6);
     AffineTransform2D transform = new AffineTransform2D(matrix, vector);
 
-    Vector2D resultVector = transform.getVector();
+    Vector2D resultVector = transform.vector();
 
     Assertions.assertNotNull(resultVector, "getVector should not return null.");
     Assertions.assertEquals(vector.getX0(), resultVector.getX0(), "Vector components should match.");

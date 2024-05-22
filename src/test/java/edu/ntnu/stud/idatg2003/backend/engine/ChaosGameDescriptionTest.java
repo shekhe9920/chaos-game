@@ -1,31 +1,111 @@
 package edu.ntnu.stud.idatg2003.backend.engine;
 
+import edu.ntnu.stud.idatg2003.backend.mathoperations.Matrix2x2;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
+import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
-import java.util.List;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Test class for {@link ChaosGameDescription}.
+ * This class contains tests for verifying the functionality of the ChaosGameDescription class,
+ * including both positive and negative tests.
+ */
 class ChaosGameDescriptionTest {
 
-  @Test
-  void constructor_ValidInput_ShouldCreateDescription() {
-    Vector2D minCoords = new Vector2D(0, 0);
-    Vector2D maxCoords = new Vector2D(1, 1);
-    List<Transform2D> transformations = List.of(new DummyTransform());
+  private Vector2D minCoords;
+  private Vector2D maxCoords;
+  private List<Transform2D> transformations;
 
-    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
-
-    Assertions.assertEquals(minCoords, description.getMinCoords(), "Min coords do not match.");
-    Assertions.assertEquals(maxCoords, description.getMaxCoords(), "Max coords do not match.");
-    Assertions.assertEquals(1, description.getTransformations().size(), "Transformations size should be 1.");
+  @BeforeEach
+  void setUp() {
+    minCoords = new Vector2D(-1, -1);
+    maxCoords = new Vector2D(1, 1);
+    transformations = new ArrayList<>();
+    Matrix2x2 matrix = new Matrix2x2(0.5, 0, 0, 0.5);
+    Vector2D vector = new Vector2D(1, 1);
+    transformations.add(new AffineTransform2D(matrix, vector));
   }
 
-  // DummyTransform for testing purposes:
-  static class DummyTransform implements Transform2D {
-    @Override
-    public Vector2D transform(Vector2D z) {
-      return new Vector2D(0.5, 0.5); // Returning a simple, fixed transformation
-    }
+  /**
+   * Tests the initialization of ChaosGameDescription with valid parameters.
+   */
+  @Test
+  void testInitialization_Valid() {
+    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
+    assertEquals(minCoords, description.getMinCoords(), "MinCoords should match the initialized value.");
+    assertEquals(maxCoords, description.getMaxCoords(), "MaxCoords should match the initialized value.");
+    assertEquals(transformations, description.getTransformations(), "Transformations should match the initialized list.");
+  }
+
+  /**
+   * Tests setting the transformations with a valid list.
+   */
+  @Test
+  void testSetTransformations_Valid() {
+    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
+    Matrix2x2 newMatrix = new Matrix2x2(0.3, 0, 0, 0.3);
+    Vector2D newVector = new Vector2D(2, 2);
+    List<Transform2D> newTransformations = List.of(new AffineTransform2D(newMatrix, newVector));
+    description.setTransformations(newTransformations);
+    assertEquals(newTransformations, description.getTransformations(), "Transformations should be updated to the new list.");
+  }
+
+  /**
+   * Tests setting the transformations with a null list, expecting an IllegalArgumentException.
+   */
+  @Test
+  void testSetTransformations_Null() {
+    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> description.setTransformations(null));
+    assertEquals("Transformations cannot be null", exception.getMessage());
+  }
+
+  /**
+   * Tests setting the minimum coordinates with a valid Vector2D.
+   */
+  @Test
+  void testSetMinCoords_Valid() {
+    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
+    Vector2D newMinCoords = new Vector2D(-2, -2);
+    description.setMinCoords(newMinCoords);
+    assertEquals(newMinCoords, description.getMinCoords(), "MinCoords should be updated to the new value.");
+  }
+
+  /**
+   * Tests setting the minimum coordinates with a null value, expecting an IllegalArgumentException.
+   */
+  @Test
+  void testSetMinCoords_Null() {
+    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> description.setMinCoords(null));
+    assertEquals("MinCoords cannot be null", exception.getMessage());
+  }
+
+  /**
+   * Tests setting the maximum coordinates with a valid Vector2D.
+   */
+  @Test
+  void testSetMaxCoords_Valid() {
+    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
+    Vector2D newMaxCoords = new Vector2D(2, 2);
+    description.setMaxCoords(newMaxCoords);
+    assertEquals(newMaxCoords, description.getMaxCoords(), "MaxCoords should be updated to the new value.");
+  }
+
+  /**
+   * Tests setting the maximum coordinates with a null value, expecting an IllegalArgumentException.
+   */
+  @Test
+  void testSetMaxCoords_Null() {
+    ChaosGameDescription description = new ChaosGameDescription(minCoords, maxCoords, transformations);
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> description.setMaxCoords(null));
+    assertEquals("MaxCoords cannot be null", exception.getMessage());
   }
 }

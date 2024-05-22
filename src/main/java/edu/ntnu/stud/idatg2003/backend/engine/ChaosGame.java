@@ -3,10 +3,11 @@ package edu.ntnu.stud.idatg2003.backend.engine;
 import edu.ntnu.stud.idatg2003.backend.ChaosGameObserver;
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
 import edu.ntnu.stud.idatg2003.backend.transformations.AffineTransform2D;
-import edu.ntnu.stud.idatg2003.backend.utilitiesbackend.WeightedRandomSampler;
 import edu.ntnu.stud.idatg2003.backend.transformations.Transform2D;
+import edu.ntnu.stud.idatg2003.backend.utilitiesbackend.WeightedRandomSampler;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Represents a chaos game for generating fractals through iterative application of transformations.
@@ -46,7 +47,8 @@ public class ChaosGame {
    * @since 0.0.1
    */
   public ChaosGame(ChaosGameDescription description, int width, int height) {
-    this.canvas = new ChaosCanvas(width, height, description.getMinCoords(), description.getMaxCoords());
+    this.canvas =
+        new ChaosCanvas(width, height, description.getMinCoords(), description.getMaxCoords());
     this.description = description;
     this.weights = new ArrayList<>();
     this.weightedRandom = new WeightedRandomSampler(weights);
@@ -86,8 +88,6 @@ public class ChaosGame {
       }
       this.weights = weights;
       this.weightedRandom = new WeightedRandomSampler(weights);
-      System.out.println("Weights set in setTransformWeights: " + weights.size());
-      System.out.println("Weights: " + "[" + weights + "]");
     }
   }
 
@@ -118,7 +118,7 @@ public class ChaosGame {
    * @since 0.0.1
    */
   public void runSteps(int steps) {
-    // Check if the chaos game description contains affine transformations:
+    // Checks if the chaos game description contains affine transformations:
     if (hasAffineTransforms()) {
       if (weights == null || weights.isEmpty()) {
         throw new IllegalStateException("Weights are not set.");
@@ -133,8 +133,9 @@ public class ChaosGame {
     // Iterating over the specified number of steps:
     for (int i = 0; i < steps; i++) {
       int index =           // selecting a random transformation index based on weights or uniformly
-          hasAffineTransforms() ? weightedRandom.nextIndex() : i // using weights for affine transforms
-              % description.getTransformations().size();     // using uniform sampling for other transforms
+          hasAffineTransforms()
+              ? weightedRandom.nextIndex() : i // using weights for affine transforms
+              % description.getTransformations().size();  // uniform sampling for other transforms
 
       Transform2D transformation = description.getTransformations().get(index);
 
@@ -143,6 +144,8 @@ public class ChaosGame {
     }
     notifyObserversGameUpdated(); // notifying observers only once after all steps
   }
+
+
 
 
 
@@ -198,7 +201,7 @@ public class ChaosGame {
       builder.append("\n"); // moving to the next line after each row
     }
 
-    System.out.print(builder.toString()); // printing the fractal to the console
+    System.out.print(builder); // printing the fractal to the console
   }
 
 
@@ -349,8 +352,7 @@ public class ChaosGame {
    * This method is used to determine whether the chaos game should use
    * weighted random sampling for selecting transformations.
    *
-   * @return {@code true} if the description contains affine transformations,
-   * {@code false} otherwise.
+   * @return {@code true} if the description contains affine transformations.
    * @since 0.0.5
    */
   private boolean hasAffineTransforms() {

@@ -25,7 +25,7 @@ public class ChaosGameDescription {
 
   private Vector2D minCoords;  // Coordinates of the lower left corner of the drawing area.
   private Vector2D maxCoords;  // Coordinates of the upper right corner of the drawing area.
-  private List<Transform2D> transformations; // List of transformations (Affine or Julia).
+  private final List<Transform2D> transformations; // List of transformations (Affine or Julia).
 
 
 
@@ -44,10 +44,13 @@ public class ChaosGameDescription {
    *                  defining the maximum boundary.
    * @since 0.0.1
    */
-  public ChaosGameDescription(Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
+  public ChaosGameDescription(
+      Vector2D minCoords, Vector2D maxCoords, List<Transform2D> transformations) {
+
     this.transformations = new ArrayList<>(transformations); // Initializing a transformation list
     setMinCoords(minCoords); // Setting minimum coordinates
     setMaxCoords(maxCoords); // Setting maximum coordinates
+
   }
 
 

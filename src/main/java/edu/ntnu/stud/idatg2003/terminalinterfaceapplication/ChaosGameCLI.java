@@ -2,7 +2,7 @@ package edu.ntnu.stud.idatg2003.terminalinterfaceapplication;
 
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGame;
 import edu.ntnu.stud.idatg2003.backend.engine.ChaosGameDescription;
-import edu.ntnu.stud.idatg2003.filehandling.ChaosGameFileHandler;
+import edu.ntnu.stud.idatg2003.commonutilities.filehandling.ChaosGameFileHandler;
 import javafx.util.Pair;
 
 import java.io.IOException;

@@ -1,11 +1,11 @@
 package edu.ntnu.stud.idatg2003.frontend.controllers;
 
-import edu.ntnu.stud.idatg2003.frontend.view.MainView;
 import edu.ntnu.stud.idatg2003.frontend.view.AffineTransformView;
 import edu.ntnu.stud.idatg2003.frontend.view.JuliaSetView;
+import edu.ntnu.stud.idatg2003.frontend.view.MainView;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.scene.Node;
 
 /**
  * The {@code MainViewController} class manages the main views of the application.
@@ -158,9 +158,9 @@ public class MainViewController {
    */
   public String getCurrentViewType() {
     if (currentView instanceof AffineTransformView) {
-      return "Affine Transformations";  // If current is Affine, show option to switch to Julia
+      return "Affine Transformations";  // If current is Affine, option to switch to Julia
     } else if (currentView instanceof JuliaSetView) {
-      return "Julia Set";              // If current is Julia, show an option to switch to Affine
+      return "Julia Set";              // If current is Julia, option to switch to Affine
     }
     return "Change Fractal Type";  // default
   }

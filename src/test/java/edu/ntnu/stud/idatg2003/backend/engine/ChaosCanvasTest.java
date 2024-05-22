@@ -1,61 +1,153 @@
 package edu.ntnu.stud.idatg2003.backend.engine;
 
 import edu.ntnu.stud.idatg2003.backend.mathoperations.Vector2D;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+
+
+/**
+ * Test class for ChaosCanvas.
+ * This class contains unit tests that verify the correct functionality
+ * of the ChaosCanvas class.
+ */
 class ChaosCanvasTest {
 
   private ChaosCanvas chaosCanvas;
-  private Vector2D minCoords;
-  private Vector2D maxCoords;
-  private int width;
-  private int height;
+
+
+
 
   @BeforeEach
   void setUp() {
-    width = 100;
-    height = 100;
-    minCoords = new Vector2D(0, 0);
-    maxCoords = new Vector2D(99, 99);
-    chaosCanvas = new ChaosCanvas(width, height, minCoords, maxCoords);
-  }
-
-  @Test
-  void testPutPixel_ValidPoint_ShouldSucceed() {
-    Vector2D point = new Vector2D(50, 50);
-    int color = 1;
-    chaosCanvas.putPixel(point, color);
-
-    Assertions.assertEquals(color, chaosCanvas.getPixel(point),
-        "Pixel color should be set to the specified color after putPixel call.");
+    Vector2D minCoords = new Vector2D(0, 0);
+    Vector2D maxCoords = new Vector2D(10, 10);
+    chaosCanvas = new ChaosCanvas(100, 100, minCoords, maxCoords);
   }
 
 
+
+
+  /**
+   * Test to ensure the ChaosCanvas is initialized with the correct dimensions.
+   */
   @Test
-  void testClearCanvas_AfterSettingPixels_ShouldClearCanvas() {
-    Vector2D point = new Vector2D(50, 50);
-    int color = 1;
-    chaosCanvas.putPixel(point, color);
-
-    chaosCanvas.clearCanvas();
-
-    Assertions.assertEquals(0, chaosCanvas.getPixel(point),
-        "Canvas should be cleared to default value (0) after clearCanvas call.");
+  void testInitialize_Canvas() {
+    assertEquals(100, chaosCanvas.getWidth());
+    assertEquals(100, chaosCanvas.getHeight());
+    assertNotNull(chaosCanvas.getCanvasArray());
+    assertNotNull(chaosCanvas.getHitCounts());
   }
 
+
+
+
+  /**
+   * Test to ensure the clearCanvas method sets all pixels to 0.
+   */
   @Test
-  void testGetCanvasArray_AfterClearCanvas_ShouldBeEmpty() {
+  void testClear_Canvas() {
+    chaosCanvas.putPixel(new Vector2D(5, 5), 1);
     chaosCanvas.clearCanvas();
     int[][] canvasArray = chaosCanvas.getCanvasArray();
-
-    for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
-        Assertions.assertEquals(0, canvasArray[i][j],
-            "Canvas should be empty (all zeros) after clearCanvas call.");
+    for (int[] row : canvasArray) {
+      for (int pixel : row) {
+        assertEquals(0, pixel);
       }
     }
+  }
+
+
+
+
+  /**
+   * Test to ensure the putPixel method works correctly for points within bounds.
+   */
+  @Test
+  void testPut_Pixel_WithinBounds() {
+    Vector2D point = new Vector2D(5, 5);
+    chaosCanvas.putPixel(point, 1);
+    assertEquals(1, chaosCanvas.getPixel(point));
+    int[][] hitCounts = chaosCanvas.getHitCounts();
+    assertEquals(1, hitCounts[49][49]);
+  }
+
+
+
+
+
+  /**
+   * Test to ensure the putPixel method does not affect the canvas for points out of bounds.
+   */
+  @Test
+  void testPut_Pixel_OutOfBounds() {
+    Vector2D outOfBoundsPoint = new Vector2D(-1, -1);
+    chaosCanvas.putPixel(outOfBoundsPoint, 1);
+
+    // Ensure no pixel is set for out-of-bounds coordinates
+    for (int y = 0; y < chaosCanvas.getHeight(); y++) {
+      for (int x = 0; x < chaosCanvas.getWidth(); x++) {
+        assertEquals(0, chaosCanvas.getCanvasArray()[y][x], "Pixel at (" + x + "," + y + ") should remain 0");
+      }
+    }
+  }
+
+
+
+  /**
+   * Test to ensure the transformToCanvasIndices method works correctly for points within bounds.
+   */
+  @Test
+  void testTransform_ToCanvasIndices_WithinBounds() {
+    Vector2D point = new Vector2D(5, 5);
+    Vector2D expectedCanvasPoint = new Vector2D(49, 49);
+    Vector2D actualCanvasPoint = chaosCanvas.transformToCanvasIndices(point);
+    assertEquals(expectedCanvasPoint, actualCanvasPoint);
+  }
+
+
+
+
+  /**
+   * Test to ensure the transformToCanvasIndices method clamps points out of bounds to the canvas edges.
+   */
+  @Test
+  void testTransform_ToCanvasIndices_OutOfBounds() {
+    Vector2D point = new Vector2D(15, 15);
+    Vector2D expectedCanvasPoint = new Vector2D(99, 99);
+    Vector2D actualCanvasPoint = chaosCanvas.transformToCanvasIndices(point);
+    // The point is out of bounds, so it should be clamped to the edge of the canvas.
+    assertEquals(expectedCanvasPoint, actualCanvasPoint);
+  }
+
+
+
+
+  /**
+   * Test to ensure the getCanvasArray method returns a non-null 2D array with correct dimensions.
+   */
+  @Test
+  void testGet_CanvasArray() {
+    int[][] canvasArray = chaosCanvas.getCanvasArray();
+    assertNotNull(canvasArray);
+    assertEquals(100, canvasArray.length);
+    assertEquals(100, canvasArray[0].length);
+  }
+
+
+
+
+  /**
+   * Test to ensure the getHitCounts method returns a non-null 2D array with correct dimensions.
+   */
+  @Test
+  void testGet_HitCounts() {
+    int[][] hitCounts = chaosCanvas.getHitCounts();
+    assertNotNull(hitCounts);
+    assertEquals(100, hitCounts.length);
+    assertEquals(100, hitCounts[0].length);
   }
 
 

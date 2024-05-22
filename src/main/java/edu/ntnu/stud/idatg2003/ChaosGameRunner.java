@@ -16,6 +16,6 @@ public class ChaosGameRunner {
    * @since 0.0.1
    */
   public static void main(String[] args) {
-    ChaosGameGUI.main(args); // Delegate to the main method of ChaosGameGUI
+    ChaosGameGui.main(args); // Delegate to the main method of ChaosGameGUI
   }
 }
