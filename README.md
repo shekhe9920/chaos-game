@@ -4,7 +4,9 @@ A JavaFX desktop application for creating and exploring fractals using chaos gam
 
 ## Demo
 
-![Mandelbrot zoom](https://upload.wikimedia.org/wikipedia/commons/2/21/Self-Similarity-Zoom.gif)
+![Mandelbrot zoom](assets/Self-Similarity-Zoom.gif)
+
+*Fractal zoom GIF from Wikimedia Commons.*
 
 ## Preview
 
@@ -50,4 +52,6 @@ Developed as part of the IDATG2003 System Development course at NTNU Gjøvik.
 
 ## Credits
 
-Mandelbrot zoom GIF by Danielkwalsh (Wikimedia Commons), licensed under CC BY-SA 4.0.
+Mandelbrot zoom GIF: “Self-Similarity-Zoom.gif” by Danielkwalsh, via Wikimedia Commons  
+https://commons.wikimedia.org/wiki/File:Self-Similarity-Zoom.gif  
+Licensed under CC BY-SA 4.0.
